@@ -43,10 +43,13 @@
 }
 
 .brandText {
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.brandText :global(em) {
+  color: var(--accent-2);
+  font-style: normal;
 }
 
 .progress {

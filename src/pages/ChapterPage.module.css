@@ -94,6 +94,7 @@
 /* Body — text elements get readable width, interactive widgets stay wide */
 .body {
   max-width: 100%;
+  counter-reset: section;
 }
 
 .body :global(p),
@@ -109,27 +110,58 @@
 
 /* MDX content styles */
 .body :global(h2) {
-  font-size: 1.5rem;
+  position: relative;
+  font-size: 1.55rem;
   color: var(--text);
-  margin: 40px 0 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  letter-spacing: -0.01em;
+  margin: 48px 0 16px;
+  padding-bottom: 12px;
+  letter-spacing: -0.018em;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
 }
 .body :global(h2)::before {
+  counter-increment: section;
+  content: counter(section, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted-2);
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+.body :global(h2)::after {
   content: '';
-  display: inline-block;
-  width: 4px;
-  height: 18px;
-  background: linear-gradient(180deg, var(--accent), var(--accent-2));
-  border-radius: 2px;
-  margin-right: 10px;
-  vertical-align: -3px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--border-strong) 0%,
+    var(--border) 40%,
+    transparent 100%
+  );
 }
 .body :global(h3) {
-  font-size: 1.15rem;
-  color: var(--accent-2);
-  margin: 24px 0 10px;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 28px 0 10px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.body :global(h3)::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-2);
+  border-radius: 999px;
+  margin-right: 10px;
+  vertical-align: 2px;
 }
 .body :global(p),
 .body :global(ul),
