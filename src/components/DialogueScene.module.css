@@ -67,27 +67,23 @@
 
 .avatar {
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   display: grid;
   place-items: center;
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0;
   border: 1px solid var(--border);
   background: var(--bg-1);
 }
-.avatar[data-who='dohun'] {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-soft);
+.avatar[data-who='junior'] {
+  color: var(--accent-2);
+  border-color: var(--accent-2);
+  background: var(--accent-2-soft);
 }
-.avatar[data-who='boss'] {
-  color: var(--muted);
-  border-color: var(--border-strong);
-  background: var(--panel-2);
+.avatar[data-who='senior'] {
+  color: var(--branch-exp);
+  border-color: var(--branch-exp);
+  background: rgba(210, 168, 255, 0.12);
 }
 
 .lineBody {
