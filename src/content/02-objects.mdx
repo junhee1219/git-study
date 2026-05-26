@@ -1,5 +1,156 @@
+import { ObjectInspector } from '../components/ObjectInspector'
+import { Terminal } from '../components/Terminal'
 import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
 
-<Callout tone="info" title="작성 예정">
-  blob/tree/commit 객체의 정체와 해시 — 다음 회차에서 작성합니다. 챕터 1을 먼저 읽어주세요.
+## "git이 그냥 마법 같아요"
+
+신입이 가장 자주 하는 말이다. 명령어를 외워서 굴리긴 하는데 안에서 뭐가 벌어지는지 모르니 reset, rebase 같은 명령은 무서워서 못 쓴다.
+
+그런데 막상 까보면 git의 데이터 모델은 **놀랍게 단순**하다. 챕터 1에서 본 "스냅샷"은 사실 단 3종류의 객체로 표현된다 — **blob**, **tree**, **commit**. 이 챕터 끝나면 `.git/` 디렉토리 안이 손바닥처럼 보일 거다.
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  git은 3종류의 객체(blob · tree · commit)를 SHA-1 해시로 식별해서 저장한다. 같은 내용 = 같은 해시 = 한 번만 저장.
 </Callout>
+
+## 3종 객체
+
+| 객체 | 역할 | 비유 |
+|---|---|---|
+| **blob** | 파일의 **내용** (이름은 없음) | 사진 1장 |
+| **tree** | 디렉토리 — `(이름, 해시, 모드)` 목록 | 사진들이 담긴 폴더 + 목차 |
+| **commit** | 루트 tree 한 개 + 부모 commit 해시 + 메시지/작성자/시간 | 그 순간 폴더 전체에 붙인 라벨 |
+
+세 가지가 다 SHA-1 해시(40자)로 식별된다. 해시는 객체 내용으로부터 계산된다 — 그래서 **같은 내용이면 같은 해시**, **다른 내용이면 다른 해시**가 나온다 (충돌 가능성은 천문학적으로 낮음).
+
+### 각 객체가 가리키는 방향
+
+```
+commit ──→ tree ──→ blob (파일 내용)
+   │         │
+   │         └─→ tree (하위 디렉토리) ──→ blob, tree, ...
+   │
+   └─→ parent commit (이전 시점)
+```
+
+핵심은 **단방향 참조**다. commit은 tree를 가리키고, tree는 blob을 가리킨다. 반대 방향은 없다. blob은 자기가 어떤 파일 이름인지조차 모른다 — 이름은 tree가 들고 있다.
+
+## 직접 만져보기
+
+세 파일을 편집해보자. 내용이 바뀌면 그 자리에서 **blob 해시가 바뀌고**, tree 해시도 따라 바뀌고, commit을 누르면 새 commit 객체가 만들어진다.
+
+특히 `README.md`와 `COPY.md`의 내용이 **완전히 같다는 점**에 주목. 같은 blob 하나를 두 파일이 공유한다 — 이게 챕터 1의 "왜 용량이 폭발 안 하느냐" 질문의 답이다.
+
+<ObjectInspector />
+
+<Callout tone="info" title="관찰 포인트">
+  1. <code>README.md</code>를 한 글자만 바꿔보자 → 두 파일의 blob 해시가 갈라진다.
+  2. 두 파일을 다시 똑같이 만들어보자 → 다시 같은 blob을 공유한다.
+  3. commit 두 번 찍으면 두 번째 commit이 <code>parent</code>로 이전 commit 해시를 가리킨다 — 이게 히스토리의 사슬.
+</Callout>
+
+## 실제 git에서 확인
+
+위에서 본 모델이 실제 `.git/objects` 안에서 어떻게 보이는지 확인해보자.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'prompt', text: 'mkdir demo && cd demo && git init -q' },
+    { type: 'prompt', text: 'echo "hello" > a.txt && echo "hello" > b.txt' },
+    { type: 'prompt', text: 'git add . && git commit -qm "first"' },
+    { type: 'comment', text: '── 현재 HEAD가 가리키는 commit 객체 까보기' },
+    { type: 'prompt', text: 'git cat-file -p HEAD' },
+    { type: 'output', text: 'tree d564d0bc3dd917926892c55e3706cc116d5b165e' },
+    { type: 'output', text: 'author junhee <...> 1716000000 +0900' },
+    { type: 'output', text: 'committer junhee <...> 1716000000 +0900' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'first' },
+    { type: 'comment', text: '── tree 객체를 까보면 두 파일이 같은 blob 가리킴' },
+    { type: 'prompt', text: 'git cat-file -p d564d0' },
+    { type: 'output', text: '100644 blob ce013625030ba8dba906f756967f9e9ca394464a\ta.txt' },
+    { type: 'output', text: '100644 blob ce013625030ba8dba906f756967f9e9ca394464a\tb.txt' },
+    { type: 'comment', text: '── blob을 까보면 그냥 내용' },
+    { type: 'prompt', text: 'git cat-file -p ce0136' },
+    { type: 'output', text: 'hello' },
+  ]}
+/>
+
+명령어 세 개 — `git cat-file -p <hash>`, `git ls-tree HEAD`, `git rev-parse HEAD` — 만 알아도 `.git/` 안을 자유롭게 탐색할 수 있다.
+
+## 함정과 팁
+
+- **함정 1: "commit 메시지만 바꾸면 hash가 그대로일 줄 알았어요"**
+  commit hash는 tree + parent + 메시지 + 작성자 + 타임스탬프 **모두**의 해시다. 메시지 한 글자만 바꿔도 hash가 통째로 바뀐다. `git commit --amend`가 새 commit을 만드는 이유다.
+
+- **함정 2: "같은 파일 두 개면 용량 두 배 아닌가요?"**
+  아니다. blob은 **내용** 기반이라 자동으로 deduplication된다. 위 예제에서 `a.txt`와 `b.txt`가 같은 blob을 공유한 게 그 증거.
+
+- **함정 3: "blob 안에 파일명도 들어있나요?"**
+  들어있지 않다. blob은 순수 내용. 파일명은 tree가 들고 있다. 그래서 같은 내용을 다른 이름으로 두 군데 둬도 blob은 하나.
+
+- **팁: `git log --oneline`의 짧은 해시도 객체 해시의 앞 글자**
+  git이 알아서 충돌 안 나게 잘라서 보여줄 뿐, 실제론 40자 SHA-1이다.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '파일 이름은 다음 중 어떤 객체에 들어있는가?',
+      choices: [
+        { id: 'a', text: 'blob' },
+        { id: 'b', text: 'tree' },
+        { id: 'c', text: 'commit' },
+        { id: 'd', text: '세 가지 모두에 들어있다' },
+      ],
+      answer: 'b',
+      explain:
+        'blob은 순수 내용, commit은 메타데이터 + 루트 tree, 파일명-해시 매핑은 tree만 들고 있다.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        '커밋 메시지의 오타만 고치고 싶다. 새로 만들어진 commit의 해시는 어떻게 되는가?',
+      choices: [
+        { id: 'a', text: '메시지 외엔 안 바뀌었으니 같다' },
+        { id: 'b', text: '바뀐다 — commit hash는 메시지를 포함한 전체 내용의 해시이기 때문' },
+      ],
+      answer: 'b',
+      explain:
+        '그래서 amend는 "수정"이 아니라 "새 commit 생성 + 기존 commit 버림"이다.',
+    },
+    {
+      id: 'q3',
+      prompt: '같은 내용의 파일 100개를 한 커밋에 넣으면 blob 객체는 몇 개 만들어지는가?',
+      choices: [
+        { id: 'a', text: '100개' },
+        { id: 'b', text: '1개' },
+        { id: 'c', text: '파일명 길이에 따라 다름' },
+      ],
+      answer: 'b',
+      explain:
+        'blob은 내용 주소화 저장이라 같은 내용은 같은 해시 → 객체 하나로 식별. tree만 100개의 (이름, 같은 해시) 항목을 갖는다.',
+    },
+    {
+      id: 'q4',
+      prompt:
+        '<code>git cat-file -p <해시></code> 가 보여주는 것은? (commit 해시를 줬을 때)',
+      choices: [
+        { id: 'a', text: '파일 내용' },
+        { id: 'b', text: 'tree + parent + author + 메시지' },
+        { id: 'c', text: '브랜치 이름 목록' },
+      ],
+      answer: 'b',
+      explain:
+        'commit 객체의 raw 내용을 보여준다. tree 해시, parent 해시, author/committer, 빈 줄, 메시지 순.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+객체 모델은 손에 잡혔다. 그럼 "브랜치"는 도대체 뭘까? 새 객체 종류가 또 있는 걸까?
+
+다음 챕터에서 답은 **"아니다, 브랜치는 그냥 commit 해시 하나를 가리키는 이름표"** — 다음에서 만지면서 확인하자.
