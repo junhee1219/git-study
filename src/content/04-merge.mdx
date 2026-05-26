@@ -1,5 +1,182 @@
+import { MergeDemo } from '../components/MergeDemo'
+import { ConflictDemo } from '../components/ConflictDemo'
+import { Terminal } from '../components/Terminal'
 import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
 
-<Callout tone="info" title="작성 예정">
-  merge vs rebase, 3-way merge, conflict의 발생 메커니즘 — 다음 회차에서 작성합니다.
+## 신입의 일화 — "conflict 안 풀고 push했어요"
+
+git을 막 익힌 신입에게 자주 일어나는 일.
+
+> "pull 했더니 뭐가 빨갛게 떴고, 시키는 대로 add/commit 해서 push했어요. 그런데 그 뒤로 서비스가 안 켜진대요."
+
+이 한 줄에 3가지 오해가 겹쳐있다.
+
+1. merge가 뭘 하는지 모름 → 왜 conflict가 났는지 모름
+2. `<<<<<<<` 마커가 "git이 친절히 알려준 문제 신호"라는 걸 모르고 그냥 코드의 일부로 인식
+3. add → commit → push가 conflict를 "해결한 게 아니라" 그대로 **저장**한다는 사실
+
+이 챕터 끝나면 이 세 가지가 명확해진다.
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  merge는 두 갈래를 합치는 두 가지 방법(merge / rebase)이 있고, 같은 줄을 둘 다 다르게 고쳤을 때만 conflict가 난다. conflict는 git이 사람에게 결정권을 넘긴 신호 — marker가 남아있는 채로 commit하면 그게 그대로 코드가 된다.
 </Callout>
+
+## 두 가지 합치는 방법
+
+챕터 3에서 main과 feat이 갈라졌다. 이걸 다시 합치는 방법은 정확히 두 가지다.
+
+### 1. `git merge` — 합쳤다는 사실을 기록
+
+새 commit 하나를 만든다. 이 commit은 **부모가 둘** — 두 갈래의 끝을 모두 가리킨다. 기존 커밋은 손대지 않는다.
+
+장점: 히스토리가 사실 그대로 남는다.
+단점: 그래프가 어수선해질 수 있다 (사람들이 평행하게 작업한 흔적이 다 보임).
+
+### 2. `git rebase` — 갈래가 없었던 것처럼 다시 적용
+
+feat의 커밋들을 main 끝에 **새로 만들어 붙인다**. 결과적으로 히스토리가 일직선이 된다. **단, 기존 feat 커밋의 해시가 바뀐다** (= 다른 객체가 됨).
+
+장점: 깔끔한 일자형 히스토리.
+단점: 이미 다른 사람과 공유한 커밋을 rebase하면 **혼란 (다른 사람 입장에선 커밋이 통째로 바뀜)**.
+
+### 두 결과를 같은 출발점에서 비교
+
+<MergeDemo />
+
+<Callout tone="info" title="언제 어느 쪽?">
+  팀 규칙에 따라 갈리지만 흔한 원칙:
+  <ul>
+    <li>로컬에서 내 작업을 정리할 때 → <strong>rebase</strong></li>
+    <li>이미 PR 올리고 다른 사람과 공유 중인 브랜치 → <strong>merge</strong></li>
+    <li>main에 PR을 합칠 때 → 팀 컨벤션 (squash merge / merge commit / rebase merge)</li>
+  </ul>
+</Callout>
+
+## conflict는 언제 나나
+
+merge든 rebase든 git은 자동으로 합치려고 한다. **3-way merge**라는 알고리즘으로:
+
+- **base**: 두 브랜치의 공통 조상 commit
+- **ours**: 현재 브랜치의 변경
+- **theirs**: 합쳐오는 브랜치의 변경
+
+같은 줄을 **양쪽이 base와 다르게 수정**했으면 git이 "어느 쪽이 맞는지 모르겠다" 하고 conflict를 표시한다. 그 외엔 대부분 자동.
+
+### conflict 풀어보기
+
+<ConflictDemo />
+
+위 데모에서 한 가지를 골라 resolve해보자. 진짜 git에서는:
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'prompt', text: 'git merge feat' },
+    { type: 'output', text: 'Auto-merging README.md' },
+    { type: 'output', text: 'CONFLICT (content): Merge conflict in README.md' },
+    { type: 'output', text: 'Automatic merge failed; fix conflicts and then commit.' },
+    { type: 'comment', text: '── 파일을 열어서 <<<<<<<, =======, >>>>>>> 마커를 직접 정리' },
+    { type: 'prompt', text: 'vim README.md  # 마커 제거하고 원하는 내용만 남김' },
+    { type: 'prompt', text: 'git add README.md' },
+    { type: 'prompt', text: 'git commit  # 메시지는 미리 채워져 있음' },
+    { type: 'comment', text: '── 이제 merge commit이 만들어진다' },
+  ]}
+/>
+
+## 신입 일화의 정체
+
+처음 일화로 돌아가보자.
+
+> "pull 했더니 뭐가 빨갛게 떴고, 시키는 대로 add/commit 해서 push했어요."
+
+신입이 한 일을 풀어보면:
+1. `git pull` = `git fetch` + `git merge` → 원격 변경을 가져와 머지 시도
+2. 동일 파일의 동일 줄을 양쪽이 수정 → conflict
+3. 신입이 conflict marker가 **들어있는 채로** `git add` → marker도 그냥 코드의 일부로 staged
+4. `git commit` → marker 포함된 파일이 그대로 commit
+5. `git push` → 서버에 marker 들어간 코드가 올라감
+6. 빌드/실행 시 `<<<<<<<` 줄에서 syntax error → 서비스 다운
+
+<Callout tone="danger" title="실전 점검 — marker를 못 봤다는 게 가장 흔한 사고">
+  git은 친절하게 <code>git status</code>에 "Unmerged paths" 라고 표시해주고, 파일 안엔 <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> 가 박혀있다. 그래도 IDE 한구석에서 못 보면 그대로 commit된다. 안전장치:
+  <ul>
+    <li>merge/rebase 직후엔 <code>git diff --check</code> 또는 <code>grep -rn '&lt;&lt;&lt;&lt;&lt;&lt;&lt;'</code> 한 번 돌리자.</li>
+    <li>pre-commit hook으로 conflict marker가 들어가면 commit 거부하게 막아두자.</li>
+  </ul>
+</Callout>
+
+## 함정과 팁
+
+- **함정 1: `git pull --rebase` 와 그냥 `git pull` 의 차이**
+  default는 merge. `--rebase`면 내 로컬 커밋이 원격 끝에 재적용된다. 팀이 깔끔한 히스토리를 원하면 `pull.rebase = true` 설정 추천.
+
+- **함정 2: rebase 도중 conflict가 나면 커밋마다 풀어야 한다**
+  merge는 한 번에 모든 충돌이 한 머지 commit으로 모임. rebase는 **각 커밋을 차례로 재적용**하므로 같은 줄이 여러 커밋에서 건드려졌으면 같은 곳을 여러 번 풀어야 할 수 있다. <code>git rebase --continue</code> / <code>--abort</code>.
+
+- **함정 3: "fast-forward"는 merge 같지만 merge commit이 안 만들어진다**
+  feat이 main에서 갈라진 뒤 main에 아무 새 커밋이 없으면, main을 그냥 feat 끝으로 옮기기만 하면 끝. 이걸 fast-forward라고 부른다. 히스토리에 합치기 흔적이 안 남으므로 PR 머지에선 보통 막거나 옵션으로 제어.
+
+- **팁: VSCode/JetBrains의 merge 도구는 진짜 좋다**
+  3-way diff를 시각적으로 보여줘서 marker로 정리하는 것보다 훨씬 안전. 익숙해질 가치 있다.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt:
+        'main에서 갈라진 feat에 main에 없는 커밋만 있다. <code>git merge feat</code> 하면 어떻게 되는가?',
+      choices: [
+        { id: 'a', text: 'merge commit이 만들어진다' },
+        { id: 'b', text: 'fast-forward — merge commit 없이 main 라벨만 feat 끝으로 이동' },
+        { id: 'c', text: 'rebase처럼 커밋들의 해시가 바뀐다' },
+      ],
+      answer: 'b',
+      explain:
+        '양쪽이 갈라지지 않은(=main에 새 커밋이 없는) 케이스라 그냥 라벨 이동. merge commit은 양쪽 다 새 커밋이 있을 때만.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        'rebase 후 feat의 커밋 해시는 어떻게 되는가?',
+      choices: [
+        { id: 'a', text: '그대로 유지' },
+        { id: 'b', text: '바뀐다 — 부모가 달라졌으므로 다른 객체' },
+      ],
+      answer: 'b',
+      explain:
+        'commit hash는 (tree + parent + 메타데이터) 전체의 해시. 부모만 바뀌어도 해시가 통째로 달라진다. 그래서 이미 공유된 브랜치 rebase는 위험.',
+    },
+    {
+      id: 'q3',
+      prompt: 'conflict가 발생하는 조건으로 맞는 것은?',
+      choices: [
+        { id: 'a', text: '두 브랜치가 같은 파일을 건드리기만 하면 항상' },
+        { id: 'b', text: '두 브랜치가 같은 파일의 같은 줄(들)을 base와 다르게 수정한 경우' },
+        { id: 'c', text: '브랜치 두 개가 있으면 무조건' },
+      ],
+      answer: 'b',
+      explain:
+        '같은 파일의 다른 부분만 수정하면 git이 자동 머지. 충돌은 같은 줄을 양쪽이 다르게 바꿨을 때만.',
+    },
+    {
+      id: 'q4',
+      prompt:
+        'merge 중 conflict를 풀지 않고 marker가 들어간 채로 commit & push하면 어떻게 되는가?',
+      choices: [
+        { id: 'a', text: 'git이 자동으로 막아준다' },
+        { id: 'b', text: 'marker가 코드의 일부로 그대로 저장돼서 빌드/실행 시 syntax error' },
+        { id: 'c', text: 'pull 받은 사람만 영향을 받음' },
+      ],
+      answer: 'b',
+      explain:
+        'git은 marker를 "사람이 정리할 것"으로 가정하지, 자동 차단하지 않는다. 신입의 일화 정체가 이것.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+이제 갈라진 브랜치를 안전하게 합칠 수 있다. 마지막 챕터에서는 **여러 브랜치를 동시에 켜놓고 작업하는** 고급 기술 — worktree를 다룬다.

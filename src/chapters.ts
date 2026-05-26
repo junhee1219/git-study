@@ -50,7 +50,7 @@ export const chapters: ChapterMeta[] = [
     subtitle: 'merge vs rebase, 그리고 conflict는 왜 생기나',
     estimatedMinutes: 14,
     prerequisites: ['branch'],
-    status: 'planned',
+    status: 'ready',
     Component: lazy(() => import('./content/04-merge.mdx')),
   },
   {

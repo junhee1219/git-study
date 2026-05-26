@@ -1,0 +1,95 @@
+.wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.card[data-tone='ours'] {
+  border-left: 3px solid var(--branch-main);
+}
+.card[data-tone='theirs'] {
+  border-left: 3px solid var(--branch-feat);
+}
+.card[data-tone='conflict'] {
+  border-left: 3px solid var(--danger);
+}
+.card[data-tone='resolved'] {
+  border-left: 3px solid var(--accent-2);
+}
+.card[data-tone='muted'] {
+  border-left: 3px solid var(--border);
+}
+
+.cardLabel {
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--muted);
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.cardBody {
+  background: var(--bg);
+  padding: 10px 12px;
+  margin: 0;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  border-radius: 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.controlBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+}
+.btn:hover {
+  opacity: 0.9;
+}
+.btnGhost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-family: inherit;
+}
