@@ -1,6 +1,172 @@
+import { WorktreeSim } from '../components/WorktreeSim'
+import { Terminal } from '../components/Terminal'
 import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
 
-<Callout tone="info" title="이식 예정">
-  기존 worktree 가이드(`git-worktree-guide.html`)를 이 사이트의 컴포넌트 시스템으로
-  이식할 예정입니다.
+## 흔한 상황
+
+기능 개발 중인데 핫픽스가 들어왔다. 어떻게 처리할까?
+
+- **방법 A**: `git stash` → 핫픽스 브랜치로 checkout → 작업 → 다시 stash pop. 안전하지만 컨텍스트 스위치마다 멈춰야 한다. IDE는 인덱싱을 다시 한다. node_modules 빌드도 다시.
+- **방법 B**: 같은 레포를 한 번 더 clone한다. 독립적인 작업이 가능하지만 디스크 용량이 두 배 + 두 clone 사이에 push/pull 동기화 필요.
+- **방법 C: worktree** — 한 레포에서 **여러 폴더에 동시에 여러 브랜치를 체크아웃**. 객체는 공유, 폴더만 별개.
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  하나의 git 저장소를 여러 디렉토리에 동시에 펼쳐 쓸 수 있다. 객체 DB는 공유, 각 디렉토리는 자기만의 HEAD/index를 가진다. AI 에이전트 시대에 특히 강력하다.
 </Callout>
+
+## 동작 원리 — 3가지 핵심 메커니즘
+
+| # | 메커니즘 | 효과 |
+|---|---|---|
+| 1 | **객체 DB 공유** | 메인 레포의 `.git/objects` 하나만 존재. 모든 worktree가 참조. 디스크 절약. |
+| 2 | **HEAD/index 분리** | 각 worktree는 자신만의 HEAD/index를 갖는다. 한쪽에서 브랜치 바꿔도 다른 쪽 영향 없음. |
+| 3 | **같은 브랜치 중복 금지** | 한 브랜치는 하나의 worktree에서만 체크아웃 가능. 동기 충돌 방지. |
+
+추가 worktree의 `.git`은 **디렉토리가 아니라 텍스트 파일**이다. 안에 `gitdir: <메인>/.git/worktrees/<이름>` 한 줄만 들어있다 — 메인 레포의 메타데이터로 향하는 포인터일 뿐.
+
+## 직접 만져보기
+
+worktree를 추가하고 제거해보자. 같은 브랜치를 두 번 추가하려고 하면 git이 막는다는 점, `.git` 디렉토리가 어느 쪽에 있는지에 주목.
+
+<WorktreeSim />
+
+## 명령어 레퍼런스
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'comment', text: '── 새 worktree 만들기' },
+    { type: 'prompt', text: 'git worktree add ../hot hotfix' },
+    { type: 'output', text: 'Preparing worktree (new branch "hotfix")' },
+    { type: 'output', text: "HEAD is now at d198510 main #3" },
+    { type: 'comment', text: '── 기존 브랜치를 워크트리로 가져오기' },
+    { type: 'prompt', text: 'git worktree add ../feat feature/login' },
+    { type: 'comment', text: '── 목록 확인' },
+    { type: 'prompt', text: 'git worktree list' },
+    { type: 'output', text: '/project       d198510 [main]' },
+    { type: 'output', text: '/project/../hot 7a1f0c4 [hotfix]' },
+    { type: 'output', text: '/project/../feat b3e2a91 [feature/login]' },
+    { type: 'comment', text: '── 제거' },
+    { type: 'prompt', text: 'git worktree remove ../hot' },
+    { type: 'comment', text: '── 끊어진 메타데이터 정리 (수동 삭제했을 때)' },
+    { type: 'prompt', text: 'git worktree prune' },
+  ]}
+/>
+
+## 실전 시나리오
+
+### 시나리오 1 — 핫픽스 인터럽트
+
+기능 작업 중 운영 버그가 보고됐다. stash 안 쓰고 처리.
+
+```bash
+# 메인 worktree에서 작업 중인 상태 그대로 두고
+git worktree add ../hotfix hotfix/login-bug origin/main
+cd ../hotfix
+# 핫픽스 작업 → 커밋 → push
+cd -  # 원래 작업으로 복귀 (stash pop 필요 없음)
+git worktree remove ../hotfix
+```
+
+IDE 두 개를 띄워두면 진짜 평행 작업이 가능하다.
+
+### 시나리오 2 — 코드 리뷰
+
+동료의 PR을 받아 직접 돌려보고 싶을 때.
+
+```bash
+git worktree add ../pr-123 origin/feature/new-thing
+cd ../pr-123 && npm install && npm test
+```
+
+내 main 작업 중인 디렉토리는 손도 안 댔다.
+
+### 시나리오 3 — AI 에이전트 격리
+
+Claude Code · Codex 같은 에이전트에게 작업을 시킬 때, 메인 worktree와 격리된 디렉토리에서 돌리면 충돌 위험이 없다. 에이전트가 망쳐도 `worktree remove`로 흔적 없이 정리.
+
+### 시나리오 4 — 동시 빌드/테스트
+
+`main`에서 무거운 빌드를 돌리면서 동시에 다른 worktree에서 hotfix 검증. CPU만 받쳐주면 진짜 평행으로 돌아간다.
+
+## 함정과 팁
+
+- **함정 1: 같은 브랜치를 두 worktree에 체크아웃하려고 시도 → 거부**
+  의도된 동작. 같은 ref가 두 곳에서 동시에 움직이면 history가 깨진다. 정 필요하면 `git worktree add --force` 가 있지만 위험.
+
+- **함정 2: 메인 worktree의 `.git` 디렉토리를 만지지 마라**
+  추가 worktree들이 다 그걸 참조한다. 메인 레포를 통째로 옮기면 모든 worktree가 깨진다.
+
+- **함정 3: 추가 worktree 디렉토리만 수동으로 삭제하면 메타데이터가 남는다**
+  `git worktree prune` 으로 정리. 또는 처음부터 `git worktree remove`로 깨끗하게.
+
+- **팁: 디렉토리 컨벤션**
+  형제 디렉토리에 두는 게 편하다. 예: `/Users/me/proj` (main) + `/Users/me/proj-hotfix` + `/Users/me/proj-feat`. IDE 즐겨찾기에 등록.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '추가 worktree 안의 <code>.git</code>은 무엇인가?',
+      choices: [
+        { id: 'a', text: '독립된 .git 디렉토리 (객체도 자기 안에 따로 보관)' },
+        { id: 'b', text: '메인 레포의 메타데이터를 가리키는 텍스트 파일 (gitdir 한 줄)' },
+        { id: 'c', text: '존재하지 않는다' },
+      ],
+      answer: 'b',
+      explain:
+        '그래서 객체 DB가 자동으로 공유된다. 디스크 사용량이 거의 안 늘어나는 이유.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        '같은 브랜치를 두 worktree에 동시에 체크아웃하려고 하면?',
+      choices: [
+        { id: 'a', text: '성공한다 — 두 곳에서 같이 작업 가능' },
+        { id: 'b', text: '기본적으로 거부된다 (--force로만 강제)' },
+      ],
+      answer: 'b',
+      explain:
+        '한 브랜치 ref가 두 곳에서 움직이면 충돌이 나니까. 의도된 안전장치.',
+    },
+    {
+      id: 'q3',
+      prompt: 'worktree로 추가 디렉토리를 10개 만들었다. 디스크 사용량은?',
+      choices: [
+        { id: 'a', text: '레포 크기 × 11배' },
+        { id: 'b', text: '각 worktree의 워킹트리(체크아웃된 파일)만큼만 늘어남. 객체 DB는 공유.' },
+      ],
+      answer: 'b',
+      explain:
+        '객체는 메인 .git/objects 하나만. node_modules 같은 빌드 산출물이 무거우면 그게 N배가 되니 그건 별개.',
+    },
+    {
+      id: 'q4',
+      prompt:
+        '추가 worktree 디렉토리를 <code>rm -rf</code>로 그냥 지웠다. 다음에 할 일은?',
+      choices: [
+        { id: 'a', text: '아무것도 안 해도 됨' },
+        { id: 'b', text: '<code>git worktree prune</code>으로 끊어진 메타데이터 정리' },
+        { id: 'c', text: '메인 레포 .git 재초기화' },
+      ],
+      answer: 'b',
+      explain:
+        '메인 레포의 .git/worktrees/<이름>/ 디렉토리가 남아있어서, prune이 정리해준다. 다음부터는 worktree remove를 쓰자.',
+    },
+  ]}
+/>
+
+## 마치며
+
+여기까지 다 읽었다면 신입에서 한 단계 졸업이다.
+
+- 스냅샷이 무엇인지 (Ch.1)
+- 그게 객체로 어떻게 저장되는지 (Ch.2)
+- 브랜치라는 이름표가 실제로 뭔지 (Ch.3)
+- 두 갈래를 합칠 때 무슨 일이 일어나는지, 왜 conflict가 나는지 (Ch.4)
+- 한 레포에서 여러 작업공간을 동시에 운영하는 법 (Ch.5)
+
+명령어를 외우는 단계에서 **모델을 가지고 git을 다루는** 단계로 넘어왔다는 뜻이다. 이제 새 명령어를 만나도 "이건 .git의 어디를 건드릴까?" 한 줄로 추론할 수 있다.
