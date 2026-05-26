@@ -10,20 +10,31 @@ body,
   height: 100%;
 }
 
+html {
+  background: var(--bg);
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(88, 166, 255, 0.07), transparent 70%),
+    radial-gradient(900px 500px at 90% 10%, rgba(126, 231, 135, 0.04), transparent 70%),
+    var(--bg);
+  color: var(--text-2);
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
   color: var(--accent);
   text-decoration: none;
+  transition: color var(--t-fast) var(--ease-out);
 }
 a:hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 code,
@@ -33,24 +44,29 @@ code,
 
 code:not(pre code) {
   background: var(--panel-2);
-  padding: 2px 6px;
+  padding: 1px 6px;
   border-radius: 4px;
-  color: var(--accent-2);
-  font-size: 0.9em;
+  color: var(--code-default);
+  font-size: 0.88em;
+  border: 1px solid var(--border);
 }
 
 pre {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 16px;
   overflow-x: auto;
   margin: 12px 0;
+  font-size: 0.9rem;
 }
 
 pre code {
   color: var(--text);
   font-size: 0.9em;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 h1,
@@ -58,6 +74,13 @@ h2,
 h3,
 h4 {
   font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+strong {
+  color: var(--text);
+  font-weight: 600;
 }
 
 button {
@@ -68,4 +91,21 @@ button {
 ::selection {
   background: var(--accent);
   color: var(--bg);
+}
+
+/* Scrollbar — webkit */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--panel-3);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
 }
