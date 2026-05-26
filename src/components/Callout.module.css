@@ -1,49 +1,69 @@
 .callout {
-  border: 1px solid var(--border);
-  border-left-width: 4px;
-  border-radius: var(--radius-sm);
+  position: relative;
   background: var(--panel);
-  padding: 14px 16px;
-  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px 20px;
+  margin: 20px 0;
+  overflow: hidden;
+  isolation: isolate;
 }
 
+/* subtle tone tint via corner glow — uses currentColor */
+.callout::before {
+  content: '';
+  position: absolute;
+  inset: -80px -80px auto auto;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(closest-side, currentColor, transparent 70%);
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* assign tone via currentColor */
 .callout[data-tone='info'] {
-  border-left-color: var(--accent);
-}
-.callout[data-tone='warn'] {
-  border-left-color: var(--warn);
-}
-.callout[data-tone='danger'] {
-  border-left-color: var(--danger);
+  color: var(--accent);
 }
 .callout[data-tone='success'] {
-  border-left-color: var(--accent-2);
+  color: var(--accent-2);
+}
+.callout[data-tone='warn'] {
+  color: var(--warn);
+}
+.callout[data-tone='danger'] {
+  color: var(--danger);
 }
 
-.head {
-  margin-bottom: 6px;
-}
-
-.tag {
-  display: inline-block;
-  font-size: 0.75rem;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
+  color: currentColor;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: var(--bg-1);
+  margin-bottom: 10px;
   font-weight: 600;
 }
 
-.callout[data-tone='info'] .tag {
-  color: var(--accent);
+.chipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
 }
-.callout[data-tone='warn'] .tag {
-  color: var(--warn);
-}
-.callout[data-tone='danger'] .tag {
-  color: var(--danger);
-}
-.callout[data-tone='success'] .tag {
-  color: var(--accent-2);
+
+.body {
+  color: var(--text-2);
+  line-height: 1.7;
 }
 
 .body :global(p:last-child) {

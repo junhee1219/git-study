@@ -9,7 +9,7 @@ type Props = {
   children: ReactNode
 }
 
-const labels: Record<Tone, string> = {
+const defaultLabels: Record<Tone, string> = {
   info: '메모',
   warn: '주의',
   danger: '함정',
@@ -19,9 +19,10 @@ const labels: Record<Tone, string> = {
 export function Callout({ tone = 'info', title, children }: Props) {
   return (
     <aside className={styles.callout} data-tone={tone}>
-      <div className={styles.head}>
-        <span className={styles.tag}>{title ?? labels[tone]}</span>
-      </div>
+      <span className={styles.chip} aria-hidden="true">
+        <span className={styles.chipDot} />
+        {title ?? defaultLabels[tone]}
+      </span>
       <div className={styles.body}>{children}</div>
     </aside>
   )
