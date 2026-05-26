@@ -1,13 +1,15 @@
 .wrap {
-  background: var(--panel);
+  background: linear-gradient(180deg, var(--bg-1), var(--panel));
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 18px 20px;
   margin: 16px 0;
   overflow-x: auto;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .svg {
   display: block;
-  min-width: 380px;
+  min-width: 320px;
 }

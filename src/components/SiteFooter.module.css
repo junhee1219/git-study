@@ -1,0 +1,28 @@
+.footer {
+  border-top: 1px solid var(--border);
+  margin-top: 32px;
+}
+
+.inner {
+  max-width: var(--wide-width);
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.link {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.link:hover {
+  color: var(--accent);
+}

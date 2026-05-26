@@ -1,6 +1,6 @@
 .wrap {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) 1.4fr;
+  grid-template-columns: minmax(320px, 1fr) minmax(320px, 1.2fr);
   gap: 16px;
   margin: 16px 0;
 }
@@ -70,10 +70,12 @@
 .row {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   padding: 6px 10px;
   background: var(--panel-2);
   border: 1px solid var(--border);
@@ -91,11 +93,13 @@
   background: var(--accent);
   color: var(--bg);
   border: none;
-  padding: 7px 12px;
+  padding: 7px 14px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 0.85rem;
   font-family: var(--font-mono);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .btn:hover {
   opacity: 0.9;
