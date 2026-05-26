@@ -1,7 +1,7 @@
 import styles from './SiteFooter.module.css'
 
 const REPO_URL = 'https://github.com/junhee1219/git-study'
-const CONTACT_EMAIL = 'leejunhee1219@snu.ac.kr'
+const CONTACT_EMAIL = 'leejunhee1219@kakao.com'
 
 export function SiteFooter() {
   return (
