@@ -58,9 +58,9 @@ export const chapters: ChapterMeta[] = [
     number: 5,
     title: 'worktree — 평행 작업공간',
     subtitle: '한 레포에서 동시에 여러 브랜치 작업하기',
-    estimatedMinutes: 18,
+    estimatedMinutes: 12,
     prerequisites: ['branch'],
-    status: 'planned',
+    status: 'ready',
     Component: lazy(() => import('./content/05-worktree.mdx')),
   },
 ]
