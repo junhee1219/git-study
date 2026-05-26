@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { chapters } from '../chapters'
+import { SeoHead } from '../components/SeoHead'
 import styles from './Home.module.css'
 
 const differentiators = [
@@ -36,6 +37,12 @@ const totalMinutes = chapters.reduce((s, c) => s + c.estimatedMinutes, 0)
 export function Home() {
   return (
     <div className={styles.home}>
+      <SeoHead
+        title="Git 인터랙티브 가이드"
+        description="신입 개발자를 위한 Git 인터랙티브 가이드. 명령어를 외우는 게 아니라 .git 내부 메커니즘을 손으로 만져보며 본질부터 익히는 한국어 가이드. 스냅샷, 객체(blob/tree/commit), 브랜치, merge/rebase, conflict, worktree까지."
+        path="/"
+        type="website"
+      />
       <section className={styles.hero}>
         <div className={styles.eyebrow}>
           <span className={styles.eyebrowDot} />

@@ -6,12 +6,12 @@
 .inner {
   max-width: var(--wide-width);
   margin: 0 auto;
-  padding: 18px 24px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
 }
 
 .muted {
@@ -19,9 +19,17 @@
   font-size: 0.85rem;
 }
 
+.links {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .link {
   color: var(--muted);
   font-size: 0.85rem;
+  font-family: var(--font-mono);
 }
 .link:hover {
   color: var(--accent);
