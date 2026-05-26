@@ -30,7 +30,7 @@ export const chapters: ChapterMeta[] = [
     subtitle: 'blob · tree · commit, 그리고 해시의 정체',
     estimatedMinutes: 12,
     prerequisites: ['snapshots'],
-    status: 'planned',
+    status: 'ready',
     Component: lazy(() => import('./content/02-objects.mdx')),
   },
   {
