@@ -1,5 +1,157 @@
+import { BranchPlayground } from '../components/BranchPlayground'
+import { Terminal } from '../components/Terminal'
 import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
 
-<Callout tone="info" title="작성 예정">
-  브랜치 = 포인터, HEAD의 정체, detached HEAD — 다음 회차에서 작성합니다.
+## 신입의 또 다른 오해
+
+> "브랜치를 만들면 코드가 복사되는 거 아닌가요? 그래서 브랜치 많으면 무겁고…"
+
+이 오해 때문에 신입은 브랜치를 아끼게 된다. 사실 정반대다 — git에서 브랜치는 **거의 공짜**다. 한 번 만들고 버리는 게 자연스럽다.
+
+왜 그런가? 브랜치는 코드 복사가 아니기 때문이다. 그럼 도대체 뭔가?
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  브랜치는 commit 해시 하나가 적힌 작은 텍스트 파일이다. HEAD는 "지금 어느 브랜치에 있는지"를 가리키는 또 다른 작은 파일이다. 끝.
 </Callout>
+
+## 브랜치 = 책갈피
+
+비유는 단순하다.
+
+- **commit**: 책의 한 페이지 (= 챕터 2의 commit 객체)
+- **브랜치**: 그 페이지에 끼워둔 **책갈피** (이름 + 페이지 번호)
+- **HEAD**: "지금 보고 있는 책갈피" 라벨
+
+`git branch feature` 는 책갈피 하나 새로 만드는 것. 코드 복사 아님.
+`git checkout feature` 는 "이제부터 이 책갈피로 보겠다" 선언. 코드 복사 아님.
+`git commit` 은 새 페이지 만들고, **지금 보고 있는 책갈피를 그 새 페이지로 옮긴다**.
+
+이 세 줄이 브랜치 동작의 전부다.
+
+## 실제로는 그냥 파일
+
+`.git/refs/heads/main`을 까보면 그냥 commit 해시 한 줄이 들어있다.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'prompt', text: 'cat .git/refs/heads/main' },
+    { type: 'output', text: '8c4a2f9d1e3b5a7c6d9e0f1a2b3c4d5e6f7a8b9c' },
+    { type: 'comment', text: '── 끝. 이게 main 브랜치의 "전부"다.' },
+    { type: 'prompt', text: 'cat .git/HEAD' },
+    { type: 'output', text: 'ref: refs/heads/main' },
+    { type: 'comment', text: '── HEAD는 "지금 main 브랜치를 보고 있다"는 포인터' },
+    { type: 'prompt', text: 'git branch feature' },
+    { type: 'prompt', text: 'cat .git/refs/heads/feature' },
+    { type: 'output', text: '8c4a2f9d1e3b5a7c6d9e0f1a2b3c4d5e6f7a8b9c' },
+    { type: 'comment', text: '── feature도 똑같은 commit을 가리킴. 코드 한 줄도 복사 안 됨.' },
+  ]}
+/>
+
+## 직접 만져보기
+
+아래에서 브랜치를 만들고, checkout하고, 커밋해보자. 그래프 옆에 작은 라벨이 **HEAD가 어디 가리키는지**, **각 브랜치가 어느 커밋을 가리키는지**를 매번 보여준다.
+
+권장 시나리오:
+1. `git branch feature` 만들기 → 두 브랜치가 같은 커밋을 가리킴
+2. `git checkout feature` → HEAD가 feature로 이동
+3. `git commit` 두어 번 → feature만 앞으로 나감, main은 그대로
+4. `git checkout main` → HEAD가 main으로 돌아옴
+5. `git commit` → 이번엔 main만 앞으로 나감 (브랜치가 갈라짐)
+
+<BranchPlayground />
+
+<Callout tone="info" title="관찰 포인트">
+  <ul>
+    <li>브랜치를 새로 만들 때 그래프 자체엔 아무 변화가 없다. 옆에 라벨만 하나 더 붙는다.</li>
+    <li>commit 누르면 <strong>현재 HEAD가 가리키는 브랜치</strong>만 앞으로 나간다. 다른 브랜치는 그대로.</li>
+    <li>같은 commit에서 시작한 두 브랜치가 각각 커밋을 쌓으면 그래프가 갈라지는 모양이 된다 — 이게 다음 챕터의 merge/rebase 출발점.</li>
+  </ul>
+</Callout>
+
+## detached HEAD — 라벨 없이 페이지 보기
+
+위 플레이그라운드에서 commit id를 클릭해서 checkout하면 **detached HEAD** 상태가 된다. 책갈피를 잡지 않고 그냥 페이지 번호만 외워서 그 페이지를 보는 셈.
+
+이 상태에서 새 커밋을 만들면 그 커밋을 가리키는 책갈피가 없다 → 다른 브랜치로 checkout하는 순간 git이 "이 커밋 가비지 컬렉션 대상"으로 분류하고, 운이 나쁘면 영영 잃는다.
+
+<Callout tone="danger" title="흔한 함정">
+  "어, 분명 커밋했는데 사라졌어요" 의 90%는 detached HEAD 상태에서 커밋한 뒤 브랜치를 옮긴 경우다. <code>git reflog</code> 로 살릴 수 있긴 하지만 (챕터 6에서 다룸), 애초에 작업 전엔 <strong>반드시 브랜치로 checkout</strong>.
+</Callout>
+
+## 함정과 팁
+
+- **함정 1: "브랜치를 많이 만들면 레포가 무거워진다"**
+  거짓. 브랜치 100개를 만들어도 디스크엔 40바이트 짜리 파일 100개가 추가될 뿐. 객체는 공유된다.
+
+- **함정 2: "브랜치를 지우면 그 위의 커밋들도 다 날아간다"**
+  반은 맞고 반은 틀림. 다른 브랜치가 그 커밋들을 안 가리키고 있으면 **참조 잃은 객체**가 되어 결국 GC된다. 그 커밋들을 살리려면 지우기 전 다른 브랜치/태그로 옮겨두면 된다.
+
+- **함정 3: HEAD를 너무 자주 옮긴다고 작업이 손상되진 않는다.**
+  checkout 자체는 비용이 거의 없다. 무서워하지 말고 자유롭게 옮겨가며 코드를 보자.
+
+- **팁: 브랜치 이름 컨벤션**
+  `feat/login`, `fix/typo`, `hot/critical` 같은 slash 컨벤션. git은 디렉토리처럼 그루핑해서 보여준다 (`.git/refs/heads/feat/login`).
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '<code>git branch feature</code> 명령이 디스크에 만드는 것은?',
+      choices: [
+        { id: 'a', text: '현재 브랜치의 모든 파일을 복사한 새 디렉토리' },
+        { id: 'b', text: 'commit 해시 한 줄이 들어있는 작은 텍스트 파일 (.git/refs/heads/feature)' },
+        { id: 'c', text: '새 commit 객체' },
+      ],
+      answer: 'b',
+      explain:
+        '브랜치 생성은 파일 1개 만드는 작업이다. 그래서 비용이 사실상 0.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        '<code>git checkout feature</code> 후 <code>git commit</code> 했을 때 main 브랜치의 head는?',
+      choices: [
+        { id: 'a', text: '같이 앞으로 나간다' },
+        { id: 'b', text: '그대로 — 새 커밋은 feature만 가리킴' },
+        { id: 'c', text: '없어진다' },
+      ],
+      answer: 'b',
+      explain:
+        '커밋은 "지금 HEAD가 가리키는 브랜치"만 전진시킨다. 그래서 갈래가 갈라진다.',
+    },
+    {
+      id: 'q3',
+      prompt:
+        'HEAD 파일의 내용으로 가능한 두 가지 형태는?',
+      choices: [
+        { id: 'a', text: '브랜치 이름 또는 commit 해시 (= detached)' },
+        { id: 'b', text: '브랜치 이름 또는 author 이메일' },
+        { id: 'c', text: '항상 commit 해시만' },
+      ],
+      answer: 'a',
+      explain:
+        '브랜치 모드 = "ref: refs/heads/<이름>", detached 모드 = commit 해시 직접.',
+    },
+    {
+      id: 'q4',
+      prompt:
+        'detached HEAD 상태에서 커밋한 뒤 다른 브랜치로 checkout하면 그 커밋은?',
+      choices: [
+        { id: 'a', text: '안전하게 보존된다' },
+        { id: 'b', text: '가리키는 ref가 없어 GC 대상이 된다 (reflog로 임시 복구는 가능)' },
+        { id: 'c', text: 'master 브랜치로 자동 이동' },
+      ],
+      answer: 'b',
+      explain:
+        '"커밋이 사라졌다" 사고의 단골 원인. 항상 브랜치로 checkout 후 작업.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+이제 두 브랜치가 갈라진 상황을 만들 줄 안다. 그럼 그 두 갈래를 **다시 합치려면** 어떻게 해야 할까? merge와 rebase, 그리고 conflict의 정체 — 다음 챕터에서.

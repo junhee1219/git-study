@@ -40,7 +40,7 @@ export const chapters: ChapterMeta[] = [
     subtitle: 'HEAD와 포인터, detached HEAD가 뭐길래',
     estimatedMinutes: 10,
     prerequisites: ['objects'],
-    status: 'planned',
+    status: 'ready',
     Component: lazy(() => import('./content/03-branch.mdx')),
   },
   {
