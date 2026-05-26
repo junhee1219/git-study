@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://junhee1219.github.io/git-study/sitemap.xml

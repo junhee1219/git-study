@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { chapterBySlug, chapters } from '../chapters'
+import { SeoHead } from '../components/SeoHead'
 import { NotFound } from './NotFound'
 import styles from './ChapterPage.module.css'
 
@@ -24,6 +25,13 @@ export function ChapterPage({ slug }: Props) {
 
   return (
     <article className={styles.chapter}>
+      <SeoHead
+        title={`Ch.${chapter.number} ${chapter.title}`}
+        description={chapter.seoDescription}
+        path={`/chapters/${chapter.slug}`}
+        type="article"
+        articleSection="Git"
+      />
       <header className={styles.head}>
         <div className={styles.crumbs}>
           <Link to="/" className={styles.crumb}>

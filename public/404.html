@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Git 인터랙티브 가이드</title>
+    <script>
+      // GitHub Pages SPA redirect (rafgren's spa-github-pages pattern).
+      // Capture the originally requested path and pass it as a query string,
+      // then send the visitor to index.html where main.tsx restores it.
+      // Segment count = number of leading path segments to keep (1 = "/git-study").
+      (function (segmentCount) {
+        var l = window.location;
+        var pathname = l.pathname;
+        var base =
+          '/' +
+          pathname.split('/').slice(1, 1 + segmentCount).join('/') +
+          (segmentCount ? '/' : '');
+        var rest = pathname.slice(base.length);
+        var qs =
+          (rest ? '/?p=/' + rest.replace(/&/g, '~and~') : '') +
+          (l.search
+            ? (rest ? '&' : '/?p=&') + l.search.slice(1).replace(/&/g, '~and~')
+            : '') +
+          l.hash;
+        l.replace(l.origin + base + qs);
+      })(1);
+    </script>
+  </head>
+  <body></body>
+</html>
