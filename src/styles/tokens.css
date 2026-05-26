@@ -1,0 +1,25 @@
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-2: #1c2129;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --accent-2: #7ee787;
+  --warn: #f0883e;
+  --danger: #ff7b72;
+
+  --branch-main: #58a6ff;
+  --branch-feat: #7ee787;
+  --branch-hot: #ff7b72;
+  --branch-exp: #d2a8ff;
+
+  --radius: 12px;
+  --radius-sm: 6px;
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', Roboto,
+    sans-serif;
+  --font-mono: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+}

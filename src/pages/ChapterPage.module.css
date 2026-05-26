@@ -1,0 +1,115 @@
+.chapter {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+}
+
+.back {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.back:hover {
+  color: var(--accent);
+}
+
+.meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+.number {
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+.minutes {
+  color: var(--muted);
+}
+
+.title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle {
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.body :global(h2) {
+  font-size: 1.5rem;
+  color: var(--accent);
+  margin: 32px 0 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.body :global(h3) {
+  font-size: 1.15rem;
+  color: var(--accent-2);
+  margin: 20px 0 8px;
+}
+.body :global(p),
+.body :global(ul),
+.body :global(ol) {
+  margin-bottom: 14px;
+}
+.body :global(ul),
+.body :global(ol) {
+  padding-left: 24px;
+}
+.body :global(li) {
+  margin-bottom: 6px;
+}
+.body :global(blockquote) {
+  border-left: 3px solid var(--accent);
+  padding: 8px 16px;
+  background: var(--panel);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--muted);
+  margin: 16px 0;
+}
+.body :global(blockquote p:last-child) {
+  margin-bottom: 0;
+}
+
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.pagerItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: inherit;
+}
+.pagerItem:hover {
+  text-decoration: none;
+  border-color: var(--accent);
+}
+.pagerItem[data-dir='next'] {
+  text-align: right;
+}
+.pagerLabel {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.pagerTitle {
+  font-weight: 600;
+}

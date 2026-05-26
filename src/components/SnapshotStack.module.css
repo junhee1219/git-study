@@ -1,0 +1,222 @@
+.wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+@media (max-width: 820px) {
+  .wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editor,
+.stack {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editorHead,
+.stackHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.dirty {
+  color: var(--warn);
+  font-size: 0.78rem;
+}
+
+.files {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.file {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.fileName {
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+.fileBody {
+  width: 100%;
+  background: var(--bg);
+  border: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  resize: vertical;
+}
+.fileBody:focus {
+  outline: none;
+}
+
+.commitBar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.msgInput {
+  flex: 1;
+  min-width: 140px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+.msgInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+}
+.btn:hover {
+  opacity: 0.9;
+}
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.btnGhost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-family: inherit;
+}
+
+.empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.snapList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.snap {
+  margin: 0;
+}
+
+.snapBtn {
+  width: 100%;
+  text-align: left;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.snapBtn:hover {
+  border-color: var(--accent);
+}
+.snap[data-active='true'] .snapBtn {
+  border-color: var(--accent-2);
+  background: rgba(126, 231, 135, 0.07);
+}
+
+.snapHead {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.snapHash {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+.snapMsg {
+  font-size: 0.88rem;
+}
+
+.snapFiles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+.snapFile {
+  display: flex;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--muted);
+}
+.snapFileName {
+  color: var(--accent-2);
+  min-width: 80px;
+}
+.snapFilePreview {
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0;
+}

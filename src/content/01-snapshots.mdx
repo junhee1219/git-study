@@ -1,0 +1,119 @@
+import { SnapshotStack } from '../components/SnapshotStack'
+import { Terminal } from '../components/Terminal'
+import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
+
+## 신입이 자주 갖는 오해
+
+처음 git을 배운 사람에게 "git이 뭘 저장하느냐"고 물어보면 대부분 이렇게 답한다.
+
+> "변경된 부분(diff)을 저장하지 않나요? 그래야 효율적이잖아요."
+
+그럴 듯하지만 **틀린 모델**이다. 이 오해 하나가 나중에 conflict, rebase, reset 같은 명령을 만났을 때 머릿속에서 길을 잃게 만든다.
+
+## 핵심 비유: 사진첩
+
+git은 **변경분이 아니라 매 시점의 전체 사진을 찍어서 사진첩에 붙여두는 도구**다.
+
+- `git commit` 한 번 = 사진 한 장 (작업 디렉토리 전체의 스냅샷)
+- 히스토리 = 시간순으로 정렬된 사진첩
+- 두 커밋 사이의 diff = git이 두 사진을 보고 **계산해서** 보여주는 것 (저장된 게 아니다)
+
+이 모델이 머릿속에 박혀 있어야 다음 챕터들이 전부 매끄럽게 이어진다.
+
+<Callout tone="success" title="핵심">
+  git은 매 커밋마다 작업 디렉토리 전체의 스냅샷을 통째로 저장한다. diff는 보여주기 위한 계산 결과지 저장 단위가 아니다.
+</Callout>
+
+## 직접 만져보기
+
+아래에서 두 파일을 자유롭게 고치고 <code>git commit</code>을 눌러보자. 스냅샷이 쌓일 때마다 **그 시점의 파일 전체 내용**이 통째로 보관된다. 과거 스냅샷을 클릭하면 그 사진이 통째로 복원된다.
+
+<SnapshotStack />
+
+<Callout tone="info" title="관찰 포인트">
+  스냅샷 카드 안을 잘 보면, 매번 두 파일의 **전체 내용**이 다 들어있다. "이번엔 README 한 줄만 바꿨으니 한 줄만 저장" 같은 게 아니다.
+</Callout>
+
+## "어, 그러면 용량 폭발 아니에요?"
+
+좋은 의문이다. 매 커밋이 전체 스냅샷이면 한 줄 바꿀 때마다 레포가 두 배가 돼야 할 것 같다. 그런데 실제론 그렇지 않다. 비밀은 **내용 주소화(content-addressed) 저장**에 있다.
+
+- 같은 내용의 파일은 한 번만 저장된다 (해시가 같으니까).
+- 안 바뀐 파일은 새 스냅샷에서도 **같은 객체를 가리키기만 한다**.
+- 결과: 모델은 "전체 스냅샷"이지만 디스크 사용량은 "변경된 부분에 가깝게"가 된다.
+
+이 구조의 세부 — blob/tree/commit 객체와 해시 — 가 챕터 2의 주제다. 지금은 "**모델은 스냅샷, 저장 효율은 공유로 해결**"이라는 두 줄만 기억하면 된다.
+
+## 실제 git으로 확인
+
+말로만 듣지 말고 실제로 보자. 다음 명령들을 따라치면 같은 내용 파일 두 개가 진짜로 **하나의 객체**로 저장되는 걸 볼 수 있다.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'prompt', text: 'mkdir demo && cd demo && git init -q' },
+    { type: 'prompt', text: 'echo "hello" > a.txt' },
+    { type: 'prompt', text: 'echo "hello" > b.txt' },
+    { type: 'prompt', text: 'git add . && git commit -qm "first"' },
+    { type: 'prompt', text: 'git ls-tree HEAD' },
+    { type: 'output', text: '100644 blob ce013625030ba8dba906f756967f9e9ca394464a\ta.txt' },
+    { type: 'output', text: '100644 blob ce013625030ba8dba906f756967f9e9ca394464a\tb.txt' },
+    { type: 'comment', text: 'a.txt 와 b.txt 가 같은 blob 해시를 가리킨다 → 한 번만 저장됨' },
+  ]}
+/>
+
+## 함정과 팁
+
+- **함정 1.** "git이 diff를 저장한다"고 생각하면, `git reset --hard <과거 커밋>` 같은 명령이 무서워 보인다. 실제론 그냥 "사진첩에서 옛 사진 한 장을 골라 통째로 복사하는" 동작이라 안전하다.
+- **함정 2.** "한 줄만 바꾸면 한 줄짜리 커밋이 만들어진다"는 생각 → 사실은 매번 전체 트리 스냅샷. PR에 1줄 변경이라도 git 내부 객체는 풍성하게 만들어진다.
+- **팁.** 커밋 메시지는 미래의 자신을 위한 메모. "WIP", "fix" 같은 메시지는 사진첩에 라벨 없이 사진 붙이는 셈.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: 'git이 커밋마다 저장하는 것은 다음 중 무엇에 가장 가까운가?',
+      choices: [
+        { id: 'a', text: '이전 커밋과의 변경분(diff)' },
+        { id: 'b', text: '작업 디렉토리 전체의 스냅샷' },
+        { id: 'c', text: '내가 마지막으로 add한 파일들의 diff' },
+        { id: 'd', text: '브랜치 이름과 메시지만' },
+      ],
+      answer: 'b',
+      explain:
+        '모델 자체는 "전체 스냅샷"이다. 디스크 효율은 같은 내용을 공유하는 방식(다음 챕터의 객체 모델)으로 해결한다.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        '같은 내용의 파일 두 개를 한 커밋에 추가했다. 저장소가 두 개의 별도 객체를 만들 것이라고 보아야 하는가?',
+      choices: [
+        { id: 'a', text: '예, 파일 이름이 다르니까' },
+        { id: 'b', text: '아니오, 내용 해시가 같아 객체 하나만 만들어진다' },
+      ],
+      answer: 'b',
+      explain:
+        'git은 내용 주소화 저장이라 동일 내용은 동일 객체로 식별된다. 위 ls-tree 출력에서 두 파일의 해시가 같은 걸 봤다.',
+    },
+    {
+      id: 'q3',
+      prompt:
+        '두 커밋 사이의 변경분(diff)을 화면에서 본 적이 있다. 그 diff는 어디에 저장되어 있는가?',
+      choices: [
+        { id: 'a', text: '커밋 객체 안에' },
+        { id: 'b', text: '저장되지 않는다. 두 스냅샷을 비교해서 그때그때 계산한다' },
+        { id: 'c', text: '.git/diffs 디렉토리에' },
+      ],
+      answer: 'b',
+      explain:
+        'diff는 저장 단위가 아니다. 두 스냅샷을 비교해 보여주는 결과물일 뿐.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+스냅샷이라는 모델은 잡았다. 그럼 그 스냅샷이 실제로 `.git/` 안에서 어떤 모양으로 들어 있는지 — blob, tree, commit 객체와 그 해시 — 를 다음 챕터에서 까보자.

@@ -1,0 +1,135 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.hero {
+  padding: 24px 0 8px;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.title em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--branch-exp), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.lead {
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 720px;
+}
+.lead strong {
+  color: var(--text);
+}
+
+.diffs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.diff {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.diff h3 {
+  color: var(--accent);
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+.diff p {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.sectionTitle {
+  font-size: 1.4rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.sectionLead {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  color: inherit;
+}
+.card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-soft);
+}
+.card[data-status='planned'] {
+  opacity: 0.6;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+.cardNumber {
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+.cardStatus {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.cardStatus[data-status='ready'] {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+.cardStatus[data-status='draft'] {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.cardTitle {
+  font-size: 1.15rem;
+}
+.cardSubtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.cardMeta {
+  display: flex;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  border-top: 1px dashed var(--border);
+}
