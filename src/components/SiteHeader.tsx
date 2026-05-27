@@ -29,7 +29,7 @@ export function SiteHeader() {
               />
             </svg>
           </span>
-          <span className={styles.brandText}>Git 인터랙티브 가이드</span>
+          <span className={styles.brandText}>냥사원의 Git 분투기</span>
         </Link>
 
         {currentIndex >= 0 && (

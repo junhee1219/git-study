@@ -38,8 +38,8 @@ export function Home() {
   return (
     <div className={styles.home}>
       <SeoHead
-        title="Git 인터랙티브 가이드"
-        description="신입 개발자를 위한 Git 인터랙티브 가이드. 명령어를 외우는 게 아니라 .git 내부 메커니즘을 손으로 만져보며 본질부터 익히는 한국어 가이드. 스냅샷, 객체(blob/tree/commit), 브랜치, merge/rebase, conflict, worktree까지."
+        title="냥사원의 Git 분투기"
+        description="냥테크에 입사한 냥사원과 냥부장이 굴러가는 좌충우돌 사례로 따라가는 한국어 Git 인터랙티브 가이드. 명령어를 외우는 게 아니라 .git 내부 메커니즘을 손으로 만져보며 본질부터 익힌다. 스냅샷, 객체(blob/tree/commit), 브랜치, merge/rebase, conflict, worktree까지."
         path="/"
         type="website"
       />
@@ -49,16 +49,17 @@ export function Home() {
           전체 {chapters.length}챕터 · 약 {totalMinutes}분
         </div>
         <h1 className={styles.title}>
-          Git을 <em>본질</em>부터.
+          냥사원의 <em>git pull</em>은 왜 빨갛게 떴을까.
         </h1>
         <p className={styles.lead}>
-          AI 시대에 신입이 자유자재로 다뤄야 할 도구는 git. 명령어를 외우는 게 아니라{' '}
-          <strong>속에서 무슨 일이 벌어지는지</strong>를 손으로 만져보며 익히는
-          인터랙티브 가이드.
+          냥테크에 입사한 냥사원, 첫 출근날 사수 냥부장이 <code>git pull</code> 한 줄을
+          시킨다. 그날부터 시작된 좌충우돌 분투기 — 명령어를 외우는 게 아니라{' '}
+          <strong>속에서 무슨 일이 벌어지는지</strong>를 직접 만져보며 모델을 만드는
+          가이드.
         </p>
         <div className={styles.heroActions}>
           <Link to={`/chapters/${chapters[0]!.slug}`} className={styles.btnPrimary}>
-            1챕터부터 시작 →
+            0챕터부터 시작 →
           </Link>
           <a href="#chapters" className={styles.btnGhost}>
             챕터 목록 보기

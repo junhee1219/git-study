@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import styles from './DialogueScene.module.css'
 
-type Who = '냥냥이' | '냥선배' | '내레이션'
+type Who = '냥사원' | '냥부장' | '내레이션'
 type Tone =
   | 'confident'
   | 'panic'
@@ -75,7 +75,7 @@ export function Line({ who, tone = 'normal', children }: LineProps) {
   if (who === '내레이션') {
     return <p className={styles.narration}>{children}</p>
   }
-  const isJunior = who === '냥냥이'
+  const isJunior = who === '냥사원'
   return (
     <div className={styles.line} data-who={isJunior ? 'junior' : 'senior'}>
       <span

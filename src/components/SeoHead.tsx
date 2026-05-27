@@ -12,7 +12,7 @@ type Props = {
 }
 
 const SITE_URL = 'https://junhee1219.github.io/git-study'
-const SITE_NAME = 'Git 인터랙티브 가이드'
+const SITE_NAME = '냥사원의 Git 분투기'
 
 function upsertMeta(attr: 'name' | 'property', key: string, value: string) {
   let el = document.head.querySelector(`meta[${attr}="${key}"]`) as
@@ -60,7 +60,9 @@ export function SeoHead({
 }: Props) {
   useEffect(() => {
     const fullTitle =
-      path === '/' ? `${title} — 본질부터` : `${title} · ${SITE_NAME}`
+      path === '/'
+        ? `${SITE_NAME} — Git 한국어 인터랙티브 가이드`
+        : `${title} · ${SITE_NAME}`
     const url = SITE_URL + (path === '/' ? '/' : path)
 
     document.title = fullTitle
