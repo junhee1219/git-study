@@ -2,16 +2,16 @@ import { Callout } from '../components/Callout'
 import { Quiz } from '../components/Quiz'
 import { DialogueScene, Line } from '../components/DialogueScene'
 
-## 입사 첫날, 냥냥이의 자리
+## 입사 첫날, 냥사원의 자리
 
-월요일 9시. 출근 첫날인 신입 냥냥이. 자리에 앉자마자 옆자리 냥선배가 어슬렁 다가온다.
+월요일 9시. 출근 첫날인 신입 냥사원. 자리에 앉자마자 옆자리 냥부장이 어슬렁 다가온다.
 
 <DialogueScene title="EP.00 — git pull부터 하시고요">
-  <Line who="냥선배">냥냥아, 환영해. 오늘 첫 업무는 간단해. 일단 <code>git pull</code> 부터 하시고요.</Line>
-  <Line who="냥냥이" tone="panic">…저, 죄송한데, git이 뭔가요?</Line>
-  <Line who="냥선배" tone="curious">한 번도 안 써봤어?</Line>
-  <Line who="냥냥이" tone="sigh">학교 다닐 땐 그냥 코드 USB에 옮겨다녔거든요…</Line>
-  <Line who="냥선배" tone="dry">…차근차근 가자. git이 뭔지부터.</Line>
+  <Line who="냥부장">냥사원, 환영해. 오늘 첫 업무는 간단해. 일단 <code>git pull</code> 부터 하시고요.</Line>
+  <Line who="냥사원" tone="panic">…저, 죄송한데, git이 뭔가요?</Line>
+  <Line who="냥부장" tone="curious">한 번도 안 써봤어?</Line>
+  <Line who="냥사원" tone="sigh">학교 다닐 땐 그냥 코드 USB에 옮겨다녔거든요…</Line>
+  <Line who="냥부장" tone="dry">…차근차근 가자. git이 뭔지부터.</Line>
 </DialogueScene>
 
 이 챕터는 **git을 한 번도 안 써본 사람**을 위한 챕터다. 명령어 한 줄도 안 친다. "왜 이걸 굳이 배워야 하나"에 답한다.
@@ -43,8 +43,8 @@ RPG 게임을 떠올려보자.
 코드를 짜다 보면 게임보다 더 자주 망친다. 세이브 없으면 매번 처음부터.
 
 <DialogueScene>
-  <Line who="냥냥이" tone="curious">아 세이브포인트… 학교 때 코드 망치고 울었던 게 그래서구나.</Line>
-  <Line who="냥선배">응. 그리고 더 좋은 건, 세이브 시점을 무한히 만들 수 있고, 누가 만들었는지도 다 남아.</Line>
+  <Line who="냥사원" tone="curious">아 세이브포인트… 학교 때 코드 망치고 울었던 게 그래서구나.</Line>
+  <Line who="냥부장">응. 그리고 더 좋은 건, 세이브 시점을 무한히 만들 수 있고, 누가 만들었는지도 다 남아.</Line>
 </DialogueScene>
 
 ## "그럼 Dropbox 같은 거랑 뭐가 달라요?"
@@ -78,7 +78,7 @@ RPG 게임을 떠올려보자.
 세상의 거의 모든 IT 회사가 git을 쓴다. 그래서:
 
 - **GitHub** (git 호스팅 서비스) 가 사실상 개발자 이력서 역할
-- 새 회사 입사하면 첫 출근에 `git clone` 부터 친다 (오늘 냥냥이처럼)
+- 새 회사 입사하면 첫 출근에 `git clone` 부터 친다 (오늘 냥사원처럼)
 - 코드 리뷰, PR, 이슈, 모든 협업 워크플로우가 git 위에서 굴러간다
 
 git을 모르면 동료와 같이 코드를 짜는 게 불가능에 가깝다.
@@ -93,7 +93,7 @@ git을 모르면 동료와 같이 코드를 짜는 게 불가능에 가깝다.
 
 요약: 사람이 코드 안 쓰는 시대가 와도 git은 살아남는다. 오히려 더 중요해진다.
 
-<Callout tone="info" title="냥선배 한 마디">
+<Callout tone="info" title="냥부장 한 마디">
   "AI한테 시키더라도 commit은 사람이 직접 찍어. AI는 종종 멀쩡한 코드를 멀쩡하게 망친다. git이 없으면 그 망친 시점을 찾아갈 길이 없어."
 </Callout>
 
@@ -120,9 +120,9 @@ git을 모르면 동료와 같이 코드를 짜는 게 불가능에 가깝다.
 각 챕터마다 **직접 만져보는 인터랙티브**가 들어있다. 그냥 읽고 끝이 아니라 손으로 모델을 만든다.
 
 <DialogueScene>
-  <Line who="냥냥이" tone="curious">근데 저 명령어 한 줄도 안 친다고 하셨잖아요. 진짜 안 쳐도 돼요?</Line>
-  <Line who="냥선배">이 챕터는 안 쳐도 돼. 다음 챕터부터는 살살 만질 거야. 다행히 화면 안에서 만져서 망쳐도 진짜 컴퓨터는 멀쩡해.</Line>
-  <Line who="냥냥이" tone="confident">오 안심돼요!</Line>
+  <Line who="냥사원" tone="curious">근데 저 명령어 한 줄도 안 친다고 하셨잖아요. 진짜 안 쳐도 돼요?</Line>
+  <Line who="냥부장">이 챕터는 안 쳐도 돼. 다음 챕터부터는 살살 만질 거야. 다행히 화면 안에서 만져서 망쳐도 진짜 컴퓨터는 멀쩡해.</Line>
+  <Line who="냥사원" tone="confident">오 안심돼요!</Line>
 </DialogueScene>
 
 ## 이해도 확인

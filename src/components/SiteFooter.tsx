@@ -8,7 +8,7 @@ export function SiteFooter() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <span className={styles.muted}>
-          신입을 위한 Git 인터랙티브 가이드 · 한국어
+          냥사원의 Git 분투기 · 한국어 인터랙티브 가이드
         </span>
         <nav className={styles.links}>
           <a
