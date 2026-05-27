@@ -16,6 +16,18 @@ export type ChapterMeta = {
 
 export const chapters: ChapterMeta[] = [
   {
+    slug: 'why-git',
+    number: 0,
+    title: 'git이 뭔지, 왜 배우는지',
+    subtitle: 'git을 한 번도 안 써본 사람을 위한 입구',
+    seoDescription:
+      'git이 무엇이고 왜 배워야 하는지를 쌩초보 기준으로 설명한다. 게임 세이브포인트 비유, Dropbox와의 차이, AI 시대에 git이 더 중요해지는 이유까지.',
+    estimatedMinutes: 5,
+    prerequisites: [],
+    status: 'ready',
+    Component: lazy(() => import('./content/00-why-git.mdx')),
+  },
+  {
     slug: 'snapshots',
     number: 1,
     title: '스냅샷이라는 발상',
