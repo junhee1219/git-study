@@ -12,7 +12,7 @@ import { DialogueScene, Line } from '../components/DialogueScene'
 
 냥사원의 손이 차가워진다.
 
-<DialogueScene title="EP.05 — stash, 정말 답일까?">
+<DialogueScene title="EP.09 — stash, 정말 답일까?">
   <Line who="냥사원" tone="panic">부장님!! 또요!! 작업 중인데 핫픽스 들어왔어요.</Line>
   <Line who="냥부장">진정해. 일단 어떻게 할 거야?</Line>
   <Line who="냥사원" tone="curious">git stash 하고… main으로 갈아타고… 핫픽스 만들고… 다시 돌아와서 stash pop… 그리고 npm install 또…</Line>
@@ -175,15 +175,19 @@ Claude Code · Codex 같은 에이전트에게 작업을 시킬 때, 메인 work
   ]}
 />
 
-## 마치며 — 냥사원의 다섯 주
+## 마치며 — 냥사원의 첫 분기
 
-여기까지 다 읽었다면 냥사원은 5주차에 진입했고, 신입에서 한 단계 졸업이다.
+여기까지 다 읽었다면 냥사원은 입사 첫 분기를 무사히 넘겼고, 신입에서 한 단계 졸업이다. 돌아보면:
 
 - 스냅샷이 무엇인지 (Ch.1)
-- 그게 객체로 어떻게 저장되는지 (Ch.2)
-- 브랜치라는 이름표가 실제로 뭔지 (Ch.3)
-- 두 갈래를 합칠 때 무슨 일이 일어나는지, 왜 conflict가 나는지 (Ch.4)
-- 한 레포에서 여러 작업공간을 동시에 운영하는 법 (Ch.5)
+- 그게 blob/tree/commit 객체로 어떻게 저장되는지 (Ch.2)
+- `add`가 만지는 스테이징 영역의 정체 (Ch.3)
+- 브랜치라는 이름표가 실제로 뭔지 (Ch.4)
+- 로컬과 리모트가 어떻게 대화하는지 — fetch/pull/push (Ch.5)
+- 두 갈래를 합칠 때 무슨 일이 일어나는지, 왜 conflict가 나는지 (Ch.6)
+- reset·revert·reflog로 되돌리고 복구하는 법 (Ch.7)
+- 지저분한 히스토리를 squash로 다듬는 법 (Ch.8)
+- 한 레포에서 여러 작업공간을 동시에 운영하는 법 (Ch.9)
 
 명령어를 외우는 단계에서 **모델을 가지고 git을 다루는** 단계로 넘어왔다는 뜻이다. 이제 새 명령어를 만나도 "이건 .git의 어디를 건드릴까?" 한 줄로 추론할 수 있다.
 

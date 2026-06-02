@@ -1,0 +1,183 @@
+import { StagingArea } from '../components/StagingArea'
+import { Terminal } from '../components/Terminal'
+import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
+import { DialogueScene, Line } from '../components/DialogueScene'
+
+## 냥사원, 비밀번호를 커밋하다
+
+화요일 오전. 냥사원이 어제 만든 기능을 올리려고 한다. 평소처럼 빠르게.
+
+<DialogueScene title="EP.03 — git add . 의 함정">
+  <Line who="냥사원" tone="confident">올릴게요! <code>git add .</code> 하고 커밋!</Line>
+  <Line who="냥부장" tone="curious">잠깐, 방금 뭐 올렸는지 봤어?</Line>
+  <Line who="냥사원" tone="panic">어… 전부요? 점 찍으면 전부 아니에요?</Line>
+  <Line who="냥부장" tone="dry">방금 <code>.env</code> 올라갔어. DB 비밀번호 들어있는 거.</Line>
+  <Line who="냥사원" tone="panic">헉</Line>
+  <Line who="냥부장" tone="sigh">add가 정확히 뭘 하는 건지부터 보자. 이거 모르면 계속 이래.</Line>
+</DialogueScene>
+
+냥사원은 `add`를 매일 친다. 그런데 "add가 뭘 하는 건지"는 한 번도 생각해본 적이 없다. 그냥 "커밋 전에 치는 주문" 정도로 안다. 그 틈으로 비밀번호가 새어 나갔다.
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  git에는 작업 디렉토리와 저장소 <strong>사이에 한 칸</strong>이 더 있다 — 스테이징 영역(index). <code>git add</code>는 "이번 커밋에 담을 것"을 이 칸에 골라 담는 동작이고, <code>git commit</code>은 그 칸에 담긴 것만 사진으로 찍는다.
+</Callout>
+
+## 세 칸 모델 (3-tree)
+
+지금까지 "작업 디렉토리"와 "커밋"만 있는 줄 알았다면, 사이에 한 칸이 더 있다.
+
+| 칸 | 정체 | 비유 |
+|---|---|---|
+| **작업 디렉토리** | 지금 편집기에서 보고 있는 실제 파일들 | 책상 위 |
+| **스테이징 영역 (index)** | 다음 커밋에 담길 후보 | **택배 상자** |
+| **저장소 (HEAD)** | 마지막 커밋의 스냅샷 | 발송 완료된 택배들 |
+
+흐름은 한 방향이다.
+
+```
+작업 디렉토리  ──git add──▶  스테이징(index)  ──git commit──▶  저장소(HEAD)
+   (책상 위)                    (택배 상자)                  (발송 완료)
+```
+
+`git add`는 책상 위 물건을 상자에 담는 것. `git commit`은 상자를 봉인해서 보내는 것. **상자에 담은 것만 나간다.** 책상에 어질러 둔 다른 건 안 나간다.
+
+<Callout tone="info" title="왜 굳이 한 칸을 더 두나">
+  "다섯 파일을 고쳤지만, 이번 커밋엔 그중 두 개만"이 가능해진다. 커밋을 의미 단위로 깔끔하게 자를 수 있다. 냥사원의 사고는 정반대 — <strong>아무거나 다 담아버린</strong> 경우다.
+</Callout>
+
+## 냥사원, 직접 만져보다
+
+아래에서 파일을 고치고 <code>git add</code>로 스테이징에 담아보자. 특히 **한 번 add한 뒤 그 파일을 또 고쳐보자** — "스테이징됨 + 그 후 또 수정" 상태가 뜬다. 이게 신입이 가장 많이 헷갈리는 지점이다.
+
+<StagingArea />
+
+<Callout tone="info" title="관찰 포인트">
+  <ol>
+    <li><code>README.md</code>를 고치고 <code>git add</code> → "스테이징됨". 여기서 <strong>또 고치면</strong> 같은 파일이 "스테이징됨 + 그 후 또 수정"이 된다. 지금 커밋하면 <em>add 시점 내용</em>만 들어간다.</li>
+    <li><code>.env</code>는 <code>.gitignore</code>에 걸려 있어 <code>git add .</code>를 해도 담기지 않는다 — 냥사원이 미리 이걸 해놨어야 했다.</li>
+    <li>commit을 누르면 스테이징 칸이 그대로 새 커밋이 되고, 작업 디렉토리는 안 건드린다.</li>
+  </ol>
+</Callout>
+
+## 실제 git에서 확인
+
+`git status`는 이 세 칸의 상태를 한눈에 보여준다. 색깔과 문구를 읽을 줄 알면 사고의 90%는 막힌다.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'prompt', text: 'git status' },
+    { type: 'output', text: 'Changes to be committed:   (스테이징됨 = 상자 안)' },
+    { type: 'output', text: '        modified:   README.md' },
+    { type: 'output', text: 'Changes not staged for commit:   (수정했지만 상자 밖)' },
+    { type: 'output', text: '        modified:   app.js' },
+    { type: 'output', text: 'Untracked files:   (git이 한 번도 본 적 없는 파일)' },
+    { type: 'output', text: '        .env' },
+    { type: 'comment', text: '── 스테이징된 것만 따로 보기' },
+    { type: 'prompt', text: 'git diff --staged' },
+    { type: 'comment', text: '── 상자에서 도로 빼기 (작업 내용은 그대로)' },
+    { type: 'prompt', text: 'git restore --staged .env' },
+  ]}
+/>
+
+`git diff`는 "작업 디렉토리 vs 스테이징"을, `git diff --staged`는 "스테이징 vs 마지막 커밋"을 보여준다. 두 개가 다른 칸을 비교한다는 걸 알면 헷갈릴 일이 없다.
+
+## .gitignore — 애초에 상자 근처에 못 오게
+
+냥사원의 사고를 막는 진짜 해법. 비밀번호·빌드 산출물·OS 부스러기는 **추적 자체를 안 하게** 막는다.
+
+<Terminal
+  title=".gitignore"
+  lines={[
+    { type: 'comment', text: '비밀/환경 변수' },
+    { type: 'output', text: '.env' },
+    { type: 'output', text: '.env.local' },
+    { type: 'comment', text: '의존성 — 용량 크고 재설치 가능' },
+    { type: 'output', text: 'node_modules/' },
+    { type: 'comment', text: '빌드 결과물' },
+    { type: 'output', text: 'dist/' },
+    { type: 'comment', text: 'OS / 에디터 부스러기' },
+    { type: 'output', text: '.DS_Store' },
+  ]}
+/>
+
+<Callout tone="danger" title="이미 커밋해버렸다면 — .gitignore로는 안 지워진다">
+  <code>.gitignore</code>는 <strong>아직 추적 안 하는 파일</strong>에만 적용된다. 냥사원처럼 이미 커밋된 <code>.env</code>는 <code>git rm --cached .env</code>로 추적을 끊어야 한다. 그리고 더 무서운 사실: 이미 push했다면 그 비밀번호는 <strong>히스토리에 영원히 남는다</strong> → 비밀번호를 즉시 갈아야 한다. (냥사원, 그날 DB 비번 교체)
+</Callout>
+
+## 냥사원이 자주 빠지는 함정
+
+- **함정 1: "add 했으면 그 뒤 수정도 자동으로 따라가겠지"**
+  아니다. add는 **그 순간**의 내용을 상자에 복사한다. 그 후 고친 건 다시 add해야 들어간다. 위 데모의 "스테이징됨 + 그 후 또 수정"이 이걸 보여준다.
+
+- **함정 2: `git add .` 를 습관적으로**
+  현재 폴더의 모든 변경을 담는다. 의도치 않은 파일이 섞이기 쉽다. 익숙해지면 `git add -p`(조각 단위로 골라 담기)나 파일명을 직접 지정하는 습관을.
+
+- **함정 3: "untracked랑 unstaged가 같은 거 아니에요?"**
+  다르다. **untracked** = git이 한 번도 본 적 없는 새 파일. **unstaged** = git이 알고는 있는데 이번 변경이 아직 상자 밖. status 문구가 둘을 구분해서 보여준다.
+
+- **팁: 스테이징은 챕터 2의 객체로 만들어진다**
+  `git add`하는 순간 그 파일 내용으로 **blob 객체가 즉시 만들어진다**. 스테이징 영역은 "다음 커밋의 tree 초안"인 셈. commit은 그 tree를 확정하고 commit 객체로 봉인할 뿐이다.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '<code>git add</code>가 하는 일을 가장 정확히 설명한 것은?',
+      choices: [
+        { id: 'a', text: '파일을 서버에 올린다' },
+        { id: 'b', text: '작업 디렉토리의 현재 내용을 스테이징 영역(index)에 복사한다' },
+        { id: 'c', text: '새 커밋을 만든다' },
+      ],
+      answer: 'b',
+      explain:
+        'add는 "이번 커밋에 담을 후보"를 상자에 담는 동작. 커밋을 만드는 건 commit이다.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        'README.md를 고치고 <code>git add</code> 한 뒤, 같은 파일을 또 한 번 고쳤다. 지금 <code>git commit</code>하면 커밋에 들어가는 내용은?',
+      choices: [
+        { id: 'a', text: '마지막에 고친 최신 내용' },
+        { id: 'b', text: 'add 했던 시점의 내용 (그 후 수정분은 빠짐)' },
+        { id: 'c', text: '두 버전이 충돌로 표시됨' },
+      ],
+      answer: 'b',
+      explain:
+        'commit은 스테이징 영역(=add 시점 스냅샷)을 찍는다. add 이후 수정분은 다시 add해야 들어간다.',
+    },
+    {
+      id: 'q3',
+      prompt:
+        '이미 커밋·push된 <code>.env</code>를 뒤늦게 <code>.gitignore</code>에 추가했다. 어떻게 되는가?',
+      choices: [
+        { id: 'a', text: '히스토리에서 자동으로 사라진다' },
+        { id: 'b', text: '.gitignore는 추적 중인 파일엔 효과 없음 — 이미 올라간 비밀번호는 히스토리에 남는다' },
+      ],
+      answer: 'b',
+      explain:
+        'gitignore는 untracked 파일에만 적용. 추적을 끊으려면 git rm --cached, 그리고 유출된 비밀번호는 즉시 교체해야 한다.',
+    },
+    {
+      id: 'q4',
+      prompt: 'untracked 파일과 unstaged(수정됨) 파일의 차이는?',
+      choices: [
+        { id: 'a', text: '같은 말이다' },
+        { id: 'b', text: 'untracked = git이 처음 보는 파일, unstaged = git이 아는 파일의 변경이 아직 상자 밖' },
+      ],
+      answer: 'b',
+      explain:
+        'git status가 "Untracked files"와 "Changes not staged"로 둘을 따로 표시한다.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+이제 "한 커밋에 무엇이 담기는지"를 손으로 조절할 수 있다. 그럼 그 커밋들이 쌓여 만드는 **갈래** — 브랜치 — 가 실제로 뭔지, 다음 챕터에서 까보자.
+
+> 냥사원: "브랜치 만들면 레포 무거워지죠?"
+> 냥부장: "…또 그 오해네. 가보자."

@@ -1,0 +1,175 @@
+import { ResetPlayground } from '../components/ResetPlayground'
+import { Terminal } from '../components/Terminal'
+import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
+import { DialogueScene, Line } from '../components/DialogueScene'
+
+## 냥사원, 한 시간을 날리다 (그리고 되찾다)
+
+목요일 저녁. 냥사원이 커밋 히스토리가 지저분해 보여서 손을 댄다.
+
+<DialogueScene title="EP.07 — reset --hard 와 reflog 구조대">
+  <Line who="냥사원" tone="confident">커밋 좀 정리하려고 <code>git reset --hard</code> 했어요. 깔끔!</Line>
+  <Line who="냥부장" tone="curious">어디로 reset 했는데?</Line>
+  <Line who="냥사원" tone="panic">…방금 한 시간 작업한 게 통째로 사라졌어요. 파일도 원래대로 돌아갔어요!!</Line>
+  <Line who="냥부장" tone="dry"><code>--hard</code>는 작업 디렉토리까지 되돌려. 근데 진정해.</Line>
+  <Line who="냥사원" tone="panic">복구 안 되죠 이거…</Line>
+  <Line who="냥부장">4챕터(브랜치)에서 말한 그거 기억나? <code>git reflog</code>. 쳐봐.</Line>
+  <Line who="냥사원" tone="curious">…커밋이 다 적혀있어요. 살았다!</Line>
+</DialogueScene>
+
+브랜치 챕터에서 "커밋이 사라졌어요"의 90%는 reflog로 살린다고 했다. 이번 챕터는 그 안전망을 제대로 깐다. 되돌리기 도구는 여러 개고, **무엇을 어디로 되돌리는지**가 다 다르다. 이걸 구분 못 하면 냥사원처럼 멀쩡한 작업을 날린다.
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  되돌리기 도구는 "건드리는 칸"으로 나뉜다. <code>restore</code>는 작업물·스테이징, <code>revert</code>는 과거를 보존한 채 되돌리는 새 커밋, <code>reset</code>은 브랜치 포인터를 옮긴다(<code>--soft/--mixed/--hard</code>로 어느 칸까지 따라갈지 결정). 그리고 무슨 짓을 해도 <code>reflog</code>가 HEAD의 발자취를 다 기억한다.
+</Callout>
+
+## 되돌리기 지도
+
+뭘 되돌리고 싶은지부터 정해야 도구가 정해진다.
+
+| 되돌리고 싶은 것 | 명령 | 한 일 |
+|---|---|---|
+| 작업 디렉토리의 수정 | `git restore <file>` | 마지막 커밋 내용으로 파일 복원 |
+| 잘못 add한 것 | `git restore --staged <file>` | 스테이징만 취소(작업물은 유지) |
+| 이미 한 커밋 (히스토리 보존) | `git revert <commit>` | 그 커밋을 무효화하는 **새 커밋** 추가 |
+| 커밋 자체를 무르기 | `git reset <commit>` | 브랜치를 과거로 이동 (`--soft/--mixed/--hard`) |
+| 날린 커밋 찾기 | `git reflog` | HEAD가 거쳐온 모든 자리 |
+
+핵심 갈림길은 **revert vs reset**이다.
+
+- **revert** — 과거는 그대로 두고, "그걸 취소한다"는 새 커밋을 위에 쌓는다. 히스토리가 남는다. **공유된 브랜치에서 안전.**
+- **reset** — 브랜치 포인터를 과거로 옮긴다. 그 사이 커밋들은 갈 곳을 잃는다. 히스토리를 다시 쓴다. **공유 전 내 로컬에서만.**
+
+## reset 3형제 — 어느 칸까지 따라가나
+
+3챕터의 세 칸(작업 디렉토리 / 스테이징 / HEAD)을 떠올리자. reset은 HEAD를 옮기는데, **나머지 두 칸을 같이 끌고 갈지**가 옵션이다.
+
+<ResetPlayground />
+
+<Callout tone="info" title="관찰 포인트">
+  <ul>
+    <li>과거 커밋을 target으로 고르고 <code>reset --soft</code> → HEAD만 이동. 되돌린 변경이 <strong>staged</strong>로 남는다 (그래서 "여러 커밋을 하나로 합치기"에 쓴다 — 다음 챕터).</li>
+    <li><code>--mixed</code>(기본) → 변경이 <strong>작업 디렉토리</strong>로 내려온다.</li>
+    <li><code>--hard</code> → 세 칸 전부 이동, 변경 <strong>사라짐</strong>. 냥사원이 누른 게 이거.</li>
+    <li>무엇을 하든 아래 <code>reflog</code>에 기록이 남는다 — "여기로 복구"를 누르면 부활한다.</li>
+  </ul>
+</Callout>
+
+## 실제 git에서
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'comment', text: '작업 디렉토리의 실수 수정 되돌리기' },
+    { type: 'prompt', text: 'git restore app.js' },
+    { type: 'comment', text: '잘못 add 한 것만 빼기 (작업 내용은 유지)' },
+    { type: 'prompt', text: 'git restore --staged secret.txt' },
+    { type: 'comment', text: '이미 push한 커밋을 안전하게 무효화 (새 커밋 생성)' },
+    { type: 'prompt', text: 'git revert a1b2c3d' },
+    { type: 'comment', text: '내 로컬에서 마지막 커밋만 무르고 변경은 작업물로' },
+    { type: 'prompt', text: 'git reset --mixed HEAD~1' },
+    { type: 'comment', text: '날린 줄 알았던 커밋 찾기' },
+    { type: 'prompt', text: 'git reflog' },
+    { type: 'output', text: 'a1b2c3d HEAD@{0}: reset: moving to HEAD~1' },
+    { type: 'output', text: '9f8e7d6 HEAD@{1}: commit: 한 시간짜리 작업' },
+    { type: 'comment', text: '→ 9f8e7d6 으로 복구' },
+    { type: 'prompt', text: 'git reset --hard 9f8e7d6' },
+  ]}
+/>
+
+## 작업을 잠깐 치워두기 — stash
+
+되돌리기는 아니지만 같은 식구다. "지금 작업을 커밋하긴 이른데, 잠깐 깨끗한 상태가 필요할 때" 작업물을 서랍에 넣어둔다.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'prompt', text: 'git stash' },
+    { type: 'output', text: 'Saved working directory and index state WIP on main' },
+    { type: 'comment', text: '── 작업 디렉토리가 깨끗해짐. 다른 일 처리...' },
+    { type: 'prompt', text: 'git stash pop' },
+    { type: 'comment', text: '── 치워둔 작업을 도로 꺼냄' },
+  ]}
+/>
+
+<Callout tone="info" title="stash 보다 나은 선택지도 있다">
+  핫픽스 때문에 작업을 치워야 한다면 stash 대신 <strong>worktree</strong>(마지막 챕터)가 더 편할 때가 많다. stash는 컨텍스트를 멈춰야 하지만, worktree는 작업을 그대로 둔 채 옆에 새 작업공간을 연다.
+</Callout>
+
+## 냥사원이 새로 배운 함정
+
+- **함정 1: `reset --hard`는 작업 디렉토리도 날린다**
+  커밋 안 한 변경은 reflog에도 안 남는다 (reflog는 커밋된 것만 추적). `--hard` 전엔 정말 버려도 되는지 두 번 확인.
+
+- **함정 2: 공유된 커밋을 reset하면 안 된다**
+  이미 push해서 남들이 가진 커밋을 reset으로 무르면, 5챕터의 "갈라짐 + 거절" 사고가 난다. 공유된 건 **revert**(새 커밋으로 무효화)로.
+
+- **함정 3: reflog는 영원하지 않다**
+  기본 90일 후 정리(gc)된다. 또 reflog는 **로컬 전용** — clone한 새 저장소엔 없다. 그래도 "방금 날린 것"엔 거의 항상 통한다.
+
+- **팁: 헷갈리면 revert가 가장 안전**
+  revert는 아무것도 안 지운다. 과거 위에 "취소 커밋"을 쌓을 뿐. 운영에 잘못 나간 커밋을 되돌릴 때 표준이다.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '<code>git reset --hard HEAD~1</code> 와 <code>git revert HEAD</code> 의 핵심 차이는?',
+      choices: [
+        { id: 'a', text: '둘 다 똑같이 마지막 커밋을 지운다' },
+        { id: 'b', text: 'reset은 브랜치를 과거로 옮겨 히스토리를 다시 쓰고, revert는 과거를 보존한 채 무효화 커밋을 새로 쌓는다' },
+        { id: 'c', text: 'revert가 더 위험하다' },
+      ],
+      answer: 'b',
+      explain:
+        '공유된 브랜치엔 revert(보존), 내 로컬 정리엔 reset(재작성). 이 구분이 핵심.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        'reset의 세 모드 중 작업 디렉토리의 파일 내용까지 되돌려 변경을 날리는 것은?',
+      choices: [
+        { id: 'a', text: '--soft' },
+        { id: 'b', text: '--mixed (기본값)' },
+        { id: 'c', text: '--hard' },
+      ],
+      answer: 'c',
+      explain:
+        '--soft는 HEAD만, --mixed는 HEAD+스테이징, --hard는 작업 디렉토리까지 전부. 냥사원의 사고가 --hard.',
+    },
+    {
+      id: 'q3',
+      prompt: 'reset --hard로 날린 커밋을 되찾을 때 보통 쓰는 것은?',
+      choices: [
+        { id: 'a', text: 'git reflog 로 그 커밋 해시를 찾아 reset --hard 로 복귀' },
+        { id: 'b', text: '복구 불가능하다' },
+        { id: 'c', text: 'git revert' },
+      ],
+      answer: 'a',
+      explain:
+        'reflog는 HEAD가 거쳐온 모든 자리를 기억한다. 단, 커밋 안 한 변경(작업물)은 reflog에도 없다.',
+    },
+    {
+      id: 'q4',
+      prompt: '실수로 <code>git add</code> 한 파일을, 작업 내용은 그대로 두고 스테이징만 취소하려면?',
+      choices: [
+        { id: 'a', text: 'git restore --staged <file>' },
+        { id: 'b', text: 'git reset --hard' },
+        { id: 'c', text: 'git revert <file>' },
+      ],
+      answer: 'a',
+      explain:
+        'restore --staged는 스테이징 칸만 되돌린다. --hard를 쓰면 작업 내용까지 날아간다.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+reset `--soft`가 "되돌린 변경을 staged로 남긴다"고 했다. 이걸 응용하면 지저분한 커밋 여러 개를 깔끔한 하나로 합칠 수 있다. 다음 챕터에서 냥사원의 'wip', 'asdf' 커밋 30개를 정리한다 — 그리고 그러다 또 사고를 친다.
+
+> 냥부장: "커밋 메시지가 왜 전부 'ㅁㄴㅇㄹ'야?"
+> 냥사원: "…정리할게요."

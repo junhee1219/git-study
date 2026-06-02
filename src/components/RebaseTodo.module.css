@@ -1,0 +1,227 @@
+.wrap {
+  margin: 16px 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 12px;
+}
+
+.col {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.subtle {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.subtle strong {
+  color: var(--accent-2);
+}
+
+.todo {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.todoRow {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: var(--panel-2);
+  border-left: 3px solid var(--border-strong);
+}
+.todoRow[data-action='drop'] {
+  opacity: 0.5;
+  border-left-color: var(--danger);
+}
+.todoRow[data-action='squash'],
+.todoRow[data-action='fixup'] {
+  border-left-color: var(--branch-exp);
+}
+.todoRow[data-action='reword'] {
+  border-left-color: var(--warn);
+}
+.todoRow[data-action='pick'] {
+  border-left-color: var(--accent-2);
+}
+
+.moveCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.moveBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 3px;
+  font-size: 0.6rem;
+  line-height: 1;
+  padding: 1px 4px;
+}
+.moveBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.moveBtn:disabled {
+  opacity: 0.3;
+}
+
+.select {
+  background: var(--bg-1);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  padding: 3px 4px;
+}
+.select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.rid {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: transparent;
+  padding: 0;
+}
+.msg {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.resultRow {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 6px 8px;
+  background: var(--panel-2);
+  border-radius: 4px;
+}
+.cdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--branch-feat);
+  margin-top: 3px;
+}
+.resultBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.resultTitle {
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.part {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+}
+.part[data-kind='squash'] {
+  color: var(--accent-2);
+}
+.part[data-kind='fixup'] {
+  color: var(--muted);
+}
+.empty {
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding: 8px;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+
+.warn {
+  font-size: 0.74rem;
+  color: var(--warn);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  align-self: flex-start;
+}
+.btnGhost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.7;
+}
+.hint code {
+  color: var(--accent);
+  background: var(--panel-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.76rem;
+}
+.hint strong {
+  color: var(--warn);
+}
+
+@media (max-width: 760px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+}

@@ -39,7 +39,7 @@ export function Home() {
     <div className={styles.home}>
       <SeoHead
         title="냥사원의 Git 분투기"
-        description="냥테크에 입사한 냥사원과 냥부장이 굴러가는 좌충우돌 사례로 따라가는 한국어 Git 인터랙티브 가이드. 명령어를 외우는 게 아니라 .git 내부 메커니즘을 손으로 만져보며 본질부터 익힌다. 스냅샷, 객체(blob/tree/commit), 브랜치, merge/rebase, conflict, worktree까지."
+        description="냥테크에 입사한 냥사원과 냥부장이 굴러가는 좌충우돌 사례로 따라가는 한국어 Git 인터랙티브 가이드. 명령어를 외우는 게 아니라 .git 내부 메커니즘을 손으로 만져보며 본질부터 익힌다. 스냅샷, 객체(blob/tree/commit), 스테이징, 브랜치, 리모트(push/pull/fetch), merge/rebase, conflict, 되돌리기(reset/reflog), squash, worktree까지."
         path="/"
         type="website"
       />

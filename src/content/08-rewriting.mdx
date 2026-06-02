@@ -1,0 +1,166 @@
+import { RebaseTodo } from '../components/RebaseTodo'
+import { Terminal } from '../components/Terminal'
+import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
+import { DialogueScene, Line } from '../components/DialogueScene'
+
+## 냥사원의 'asdf' 커밋 30개
+
+금요일 오전. 냥사원이 일주일치 작업으로 PR을 올렸다. 리뷰어 냥대리가 PR을 연다.
+
+<DialogueScene title="EP.08 — squash 정리, 그리고 공유 브랜치 재작성 참사">
+  <Line who="내레이션">PR의 커밋 목록: "wip", "asdf", "다시", "진짜 마지막", "오타", "오타2"… 31개.</Line>
+  <Line who="냥부장" tone="dry">냥사원, 이거 리뷰어가 뭘 보고 리뷰해.</Line>
+  <Line who="냥사원" tone="curious">아 커밋을 합칠 수 있어요? 어떻게요?</Line>
+  <Line who="냥부장">interactive rebase. squash로 의미 단위로 묶어.</Line>
+  <Line who="내레이션">10분 뒤. 냥사원이 깔끔하게 정리하고 push하려는데 또 빨갛다.</Line>
+  <Line who="냥사원" tone="panic">또 rejected요!! 분명 정리만 했는데!</Line>
+  <Line who="냥부장" tone="sigh">그 브랜치 동료랑 같이 쓰고 있었지. rebase는 커밋을 통째로 새로 만들거든.</Line>
+</DialogueScene>
+
+2챕터에서 배운 것 하나: **커밋 해시는 내용 전체(tree+parent+메시지+시간)의 해시**다. 그래서 커밋을 "수정"하면 사실은 **다른 커밋이 새로 생긴다**. 히스토리 다듬기는 이 사실 위에 서 있다. 강력하지만, 모르고 쓰면 냥사원처럼 공유 브랜치를 깨뜨린다.
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  <code>amend</code>·<code>rebase -i</code>는 커밋을 다듬는 도구지만, 실제로는 <strong>해시가 다른 새 커밋으로 교체</strong>한다. 그래서 깔끔한 PR을 만드는 데 최고지만 — <strong>이미 push해서 공유한 커밋엔 절대 쓰지 않는다.</strong>
+</Callout>
+
+## 마지막 커밋만 손보기 — amend
+
+방금 한 커밋의 메시지를 고치거나, 빠뜨린 파일을 끼워 넣을 때.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'comment', text: '메시지만 고치기' },
+    { type: 'prompt', text: 'git commit --amend -m "feat: 로그인 검증 추가"' },
+    { type: 'comment', text: '빠뜨린 파일을 마지막 커밋에 끼워넣기' },
+    { type: 'prompt', text: 'git add forgotten.js' },
+    { type: 'prompt', text: 'git commit --amend --no-edit' },
+  ]}
+/>
+
+`amend`는 "수정"처럼 보이지만 **새 커밋을 만들고 기존 걸 버린다** (2챕터에서 예고했던 그 동작). 그래서 이미 push한 커밋을 amend하면 해시가 달라져 또 거절당한다.
+
+## 여러 커밋을 다듬기 — interactive rebase
+
+`git rebase -i HEAD~N`은 최근 N개 커밋의 "할 일 목록"을 띄운다. 각 줄에 동작을 지정한다.
+
+<RebaseTodo />
+
+<Callout tone="info" title="관찰 포인트">
+  <ul>
+    <li><code>fixup</code>을 고르면 그 커밋이 위 커밋에 흡수되고 메시지는 버려진다 — 'asdf' 같은 쓰레기 메시지 정리에 딱.</li>
+    <li><code>squash</code>는 합치되 메시지를 모두 남긴다. <code>drop</code>은 아예 삭제.</li>
+    <li>↑/↓로 순서도 바꿀 수 있다. 오른쪽 "결과 히스토리"에서 31개가 2~3개로 줄어드는 걸 보자.</li>
+    <li>맨 위(가장 오래된) 줄을 squash/fixup하면 합칠 대상이 없어 경고가 뜬다.</li>
+  </ul>
+</Callout>
+
+### reset --soft 로도 합칠 수 있다
+
+7챕터의 `reset --soft`를 기억하면, 더 단순한 합치기도 가능하다.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'comment', text: '최근 5개 커밋을 "없던 일로" 하되 변경은 staged 로 남김' },
+    { type: 'prompt', text: 'git reset --soft HEAD~5' },
+    { type: 'comment', text: '── 이제 한 방에 깔끔한 커밋 하나로' },
+    { type: 'prompt', text: 'git commit -m "feat: 로그인 기능"' },
+  ]}
+/>
+
+## PR을 합칠 때 — squash merge
+
+대부분의 팀은 PR을 main에 합칠 때 GitHub의 **Squash and merge**를 쓴다. PR 안의 지저분한 커밋들을 **합치는 시점에 자동으로 하나로** 뭉쳐준다. 그러면 냥사원처럼 직접 rebase로 정리할 필요도 없다 — 개인 작업 브랜치는 어지러워도 되고, main 히스토리만 깨끗해진다.
+
+## 황금률 — 공유한 커밋은 다시 쓰지 않는다
+
+<Callout tone="danger" title="냥사원의 두 번째 사고">
+  rebase·amend는 커밋을 새 해시로 교체한다. 이미 push해서 동료가 그 커밋을 받아간 상태라면, 동료의 히스토리와 내 새 히스토리가 갈라진다 → push 거절, 강제로 밀면 동료 작업 충돌. <strong>규칙: 내 로컬에만 있는(아직 push 안 한) 커밋만 다듬는다.</strong> 정 공유 브랜치를 rebase해야 하면 팀에 공지하고 <code>--force-with-lease</code>로.
+</Callout>
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'comment', text: '내 개인 브랜치를 rebase로 정리한 뒤 (공유 전!)' },
+    { type: 'prompt', text: 'git push --force-with-lease' },
+    { type: 'comment', text: '── 그냥 --force 대신 이것. "내가 본 뒤 서버가 안 바뀐 경우만" 강제' },
+  ]}
+/>
+
+## 냥사원이 새로 배운 함정
+
+- **함정 1: amend는 공유 후엔 금지**
+  로컬에서 방금 한 커밋엔 자유롭게. push한 뒤엔 새 커밋(또는 새 amend)이 거절을 부른다.
+
+- **함정 2: rebase는 모든 해시를 바꾼다**
+  부모가 바뀌면 자식 커밋의 해시도 줄줄이 바뀐다(2챕터). 그래서 공유 브랜치 rebase가 위험한 것.
+
+- **함정 3: squash로 너무 많이 뭉치면 이력이 사라진다**
+  "왜 이렇게 고쳤지?"를 추적할 단위가 너무 커진다. 의미 단위(기능 하나 = 커밋 하나)가 적당하다.
+
+- **팁: 깨끗한 커밋은 미래의 디버깅을 살린다**
+  `git bisect`(버그가 처음 들어온 커밋을 이진 탐색)나 `git blame`은 커밋이 의미 단위일 때 빛난다. 'asdf' 31개로는 아무것도 못 찾는다.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '<code>git commit --amend</code>의 실제 동작은?',
+      choices: [
+        { id: 'a', text: '기존 커밋을 그 자리에서 수정 (해시 유지)' },
+        { id: 'b', text: '새 커밋을 만들어 기존 커밋을 대체 (해시가 바뀜)' },
+      ],
+      answer: 'b',
+      explain:
+        '커밋 해시는 메시지·내용 전체의 해시라 한 글자만 바뀌어도 새 객체가 된다(2챕터). 그래서 공유 후 amend는 위험.',
+    },
+    {
+      id: 'q2',
+      prompt:
+        'interactive rebase에서 "위 커밋에 합치되 이 커밋의 메시지는 버리고 싶다". 어떤 동작?',
+      choices: [
+        { id: 'a', text: 'squash' },
+        { id: 'b', text: 'fixup' },
+        { id: 'c', text: 'reword' },
+      ],
+      answer: 'b',
+      explain:
+        'squash는 메시지를 모두 남기고, fixup은 흡수하며 메시지를 버린다. "오타 수정" 같은 잡 커밋 정리에 fixup.',
+    },
+    {
+      id: 'q3',
+      prompt: '히스토리 재작성(rebase/amend)을 해도 비교적 안전한 경우는?',
+      choices: [
+        { id: 'a', text: '아직 push하지 않은, 내 로컬에만 있는 커밋' },
+        { id: 'b', text: '이미 push해서 동료가 받아간 커밋' },
+        { id: 'c', text: 'main 브랜치의 커밋' },
+      ],
+      answer: 'a',
+      explain:
+        '황금률: 공유된 커밋은 다시 쓰지 않는다. 내 로컬 전용 커밋만 자유롭게 다듬는다.',
+    },
+    {
+      id: 'q4',
+      prompt: '지저분한 PR 커밋을 main 머지 시점에 자동으로 하나로 뭉치는 GitHub 기능은?',
+      choices: [
+        { id: 'a', text: 'Squash and merge' },
+        { id: 'b', text: 'git reflog' },
+        { id: 'c', text: 'git stash' },
+      ],
+      answer: 'a',
+      explain:
+        'Squash merge를 쓰면 개인 브랜치는 어질러도 되고 main 히스토리만 깨끗해진다.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+이제 냥사원은 만든 히스토리를 깔끔하게 다듬을 줄도 안다. 마지막 챕터에서는 "작업을 멈추지 않고 동시에 여러 브랜치를" 다루는 법 — 핫픽스가 들어와도 칼퇴하게 해준 worktree를 만난다.
+
+> 냥사원: "금요일인데 또 핫픽스 들어오면…"
+> 냥부장: "이번엔 안 멈춰도 돼. 마지막 무기 보여줄게."

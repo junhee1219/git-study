@@ -52,8 +52,20 @@ export const chapters: ChapterMeta[] = [
     Component: lazy(() => import('./content/02-objects.mdx')),
   },
   {
-    slug: 'branch',
+    slug: 'staging',
     number: 3,
+    title: '스테이징 영역 — add는 뭘 하나',
+    subtitle: '작업 디렉토리 · index · 저장소, 세 칸 모델',
+    seoDescription:
+      'git add가 정확히 뭘 하는지 — 작업 디렉토리와 저장소 사이의 스테이징 영역(index)을 3-tree 모델로 만져본다. .gitignore로 비밀번호·node_modules 커밋 사고 막기.',
+    estimatedMinutes: 9,
+    prerequisites: ['objects'],
+    status: 'ready',
+    Component: lazy(() => import('./content/03-staging.mdx')),
+  },
+  {
+    slug: 'branch',
+    number: 4,
     title: '브랜치는 사실 이름표일 뿐',
     subtitle: 'HEAD와 포인터, detached HEAD가 뭐길래',
     seoDescription:
@@ -61,11 +73,23 @@ export const chapters: ChapterMeta[] = [
     estimatedMinutes: 10,
     prerequisites: ['objects'],
     status: 'ready',
-    Component: lazy(() => import('./content/03-branch.mdx')),
+    Component: lazy(() => import('./content/04-branch.mdx')),
+  },
+  {
+    slug: 'remotes',
+    number: 5,
+    title: '리모트와 협업',
+    subtitle: 'clone · fetch · pull · push, 그리고 origin/main의 정체',
+    seoDescription:
+      '로컬과 리모트(origin) 저장소가 어떻게 대화하는지. fetch/pull/push의 차이, origin/main 추적 브랜치, ! [rejected]의 의미와 push --force가 동료 작업을 날리는 메커니즘을 인터랙티브로.',
+    estimatedMinutes: 12,
+    prerequisites: ['branch'],
+    status: 'ready',
+    Component: lazy(() => import('./content/05-remotes.mdx')),
   },
   {
     slug: 'merge',
-    number: 4,
+    number: 6,
     title: '히스토리를 합치는 두 가지 방법',
     subtitle: 'merge vs rebase, 그리고 conflict는 왜 생기나',
     seoDescription:
@@ -73,11 +97,35 @@ export const chapters: ChapterMeta[] = [
     estimatedMinutes: 14,
     prerequisites: ['branch'],
     status: 'ready',
-    Component: lazy(() => import('./content/04-merge.mdx')),
+    Component: lazy(() => import('./content/06-merge.mdx')),
+  },
+  {
+    slug: 'undoing',
+    number: 7,
+    title: '되돌리기와 복구',
+    subtitle: 'reset · revert · restore · reflog, 그리고 stash',
+    seoDescription:
+      'reset(soft/mixed/hard)·revert·restore가 각각 어느 칸을 되돌리는지 3-tree로 구분한다. reset --hard로 날린 작업을 reflog로 복구하는 과정을 인터랙티브로.',
+    estimatedMinutes: 12,
+    prerequisites: ['staging', 'branch'],
+    status: 'ready',
+    Component: lazy(() => import('./content/07-undoing.mdx')),
+  },
+  {
+    slug: 'rewriting',
+    number: 8,
+    title: '히스토리 다듬기',
+    subtitle: 'amend · squash · fixup · interactive rebase',
+    seoDescription:
+      'amend와 interactive rebase로 지저분한 커밋을 깔끔하게 squash·정리하는 법. 커밋 해시가 새로 바뀌는 원리와 "공유한 커밋은 다시 쓰지 않는다"는 황금률을 인터랙티브로.',
+    estimatedMinutes: 12,
+    prerequisites: ['merge'],
+    status: 'ready',
+    Component: lazy(() => import('./content/08-rewriting.mdx')),
   },
   {
     slug: 'worktree',
-    number: 5,
+    number: 9,
     title: 'worktree — 평행 작업공간',
     subtitle: '한 레포에서 동시에 여러 브랜치 작업하기',
     seoDescription:
@@ -85,7 +133,7 @@ export const chapters: ChapterMeta[] = [
     estimatedMinutes: 12,
     prerequisites: ['branch'],
     status: 'ready',
-    Component: lazy(() => import('./content/05-worktree.mdx')),
+    Component: lazy(() => import('./content/09-worktree.mdx')),
   },
 ]
 

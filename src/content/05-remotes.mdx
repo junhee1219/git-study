@@ -1,0 +1,162 @@
+import { RemoteSync } from '../components/RemoteSync'
+import { Terminal } from '../components/Terminal'
+import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
+import { DialogueScene, Line } from '../components/DialogueScene'
+
+## 냥사원, 동료의 하루를 날리다
+
+수요일 오후. 냥사원이 코드를 올리려는데 빨간 글씨가 뜬다.
+
+<DialogueScene title="EP.05 — ! [rejected] 와 --force 참사">
+  <Line who="냥사원" tone="panic">부장님, push했더니 <code>! [rejected]</code> 떴어요.</Line>
+  <Line who="냥부장" tone="curious">아 그거. 서버에 너 없는 커밋이 있다는 뜻이야. pull 먼저—</Line>
+  <Line who="냥사원" tone="confident">아 검색해보니까 <code>--force</code> 붙이면 된대요! 했어요!</Line>
+  <Line who="냥부장" tone="panic">…뭐?</Line>
+  <Line who="내레이션">옆자리 냥대리가 천천히 일어선다. 방금 아침 내내 작업한 커밋이 사라졌다.</Line>
+  <Line who="냥부장" tone="sigh">그 빨간 거는 "사고 나기 전에 멈춰" 신호였어. force로 그걸 뭉갠 거고.</Line>
+</DialogueScene>
+
+여기까지 냥사원은 전부 **자기 컴퓨터 안**에서만 git을 만졌다. 그런데 협업은 "내 저장소"와 "서버 저장소"가 어떻게 대화하는지를 아는 데서 시작한다. 그 모델이 없으면 `--force`가 무슨 짓인지도 모른 채 누른다.
+
+<Callout tone="success" title="이 챕터의 한 줄 요약">
+  리모트(origin)는 그냥 "다른 곳에 있는 또 하나의 git 저장소"다. <code>fetch</code>는 서버 상태를 가져와 <code>origin/main</code>이라는 사본만 갱신하고, <code>push</code>는 내 커밋을 서버에 보낸다 — 단, 서버가 내 히스토리의 연장선일 때만(fast-forward). 아니면 거절한다. 그게 빨간 글씨다.
+</Callout>
+
+## 저장소가 둘이다
+
+`git clone`을 하는 순간 두 개의 완전한 저장소가 생긴다.
+
+- **origin**: 서버(GitHub 등)에 있는 저장소. 팀의 공용 진실.
+- **로컬**: 내 컴퓨터에 통째로 복제된 저장소. **히스토리 전부가 내 디스크에 있다.**
+
+여기서 핵심은 세 번째 등장인물이다.
+
+| 이름 | 정체 |
+|---|---|
+| `main` | 내 로컬 브랜치 (내가 커밋하면 전진) |
+| `origin/main` | **내가 마지막으로 본 서버의 main** — 리모트 추적 브랜치 |
+| 서버의 `main` | 실제 서버 상태 (동료들도 여기에 push) |
+
+`origin/main`은 서버와 실시간 연결이 아니다. **내가 마지막으로 `fetch`했을 때 찍어둔 사본**이다. 이 셋이 어떻게 어긋나고 다시 맞춰지는지가 협업의 전부다.
+
+## 네 개의 동사
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'comment', text: 'clone — 서버 저장소를 통째로 내 컴퓨터에 복제' },
+    { type: 'prompt', text: 'git clone https://github.com/team/repo.git' },
+    { type: 'comment', text: 'fetch — 서버 상태를 가져와 origin/main 만 갱신 (내 작업엔 손 안 댐)' },
+    { type: 'prompt', text: 'git fetch' },
+    { type: 'comment', text: 'pull — fetch + 통합(merge/rebase). 서버 변경을 내 main 으로' },
+    { type: 'prompt', text: 'git pull' },
+    { type: 'comment', text: 'push — 내 커밋을 서버로. -u 는 upstream(추적 대상) 연결' },
+    { type: 'prompt', text: 'git push -u origin main' },
+  ]}
+/>
+
+`fetch`와 `pull`의 차이가 헷갈리는 신입이 많다. **fetch는 "정보만 받아온다"** (origin/main 갱신, 내 코드 그대로). **pull은 "받아와서 내 작업에 합치기까지"** 한다 (fetch + merge). 안전하게 먼저 보고 싶으면 fetch, 바로 합치겠다면 pull.
+
+## 냥사원, 직접 만져보다
+
+아래에서 로컬과 서버(origin)가 어떻게 어긋나는지 만들어보자. 추천 순서: **동료가 push → 로컬 commit → push(거절됨) → pull(통합) → push(성공)**. 그리고 마지막에 `push --force`가 동료 커밋을 어떻게 지우는지 직접 눌러보자.
+
+<RemoteSync />
+
+<Callout tone="info" title="관찰 포인트">
+  <ul>
+    <li><code>git fetch</code>를 누르면 <code>origin/main</code> 라벨만 움직인다. 내 <code>main</code>은 그대로. "서버에 새 게 있구나"를 그제야 안다.</li>
+    <li>로컬에 내 커밋이 있고 서버에도 동료 커밋이 있으면 → <strong>갈라짐</strong>. 이 상태에서 push하면 거절된다.</li>
+    <li><code>pull</code>이 둘을 합쳐 merge 커밋을 만든다. 그 후엔 push가 통과한다.</li>
+    <li><code>push --force</code>는 거절을 무시하고 서버를 내 것으로 덮어쓴다 → 동료 커밋이 사라진다. 빨간 경고가 뜬다.</li>
+  </ul>
+</Callout>
+
+## 사고 재구성 — 냥사원이 누른 것
+
+1. 동료가 먼저 서버 `main`에 커밋을 push했다.
+2. 냥사원도 로컬에서 커밋하고 `git push` → 서버엔 냥사원에게 없는 커밋이 있으니 **non-fast-forward**, 거절.
+3. 빨간 글씨 = "그냥 덮어쓰면 남의 커밋 사라져요. 먼저 합치세요" 라는 git의 안전장치.
+4. 냥사원이 `--force` → "안전장치 무시하고 서버를 내 로컬로 덮어써" → **동료 커밋 소멸**.
+
+<Callout tone="danger" title="--force 는 거의 항상 답이 아니다">
+  거절(<code>! [rejected]</code>)의 올바른 대응은 <code>git pull</code>(또는 <code>git pull --rebase</code>)로 서버 변경을 먼저 가져와 합치는 것. 꼭 force가 필요한 드문 경우(내가 rebase로 정리한 <strong>내 개인 브랜치</strong>)엔 <code>--force-with-lease</code>를 써라 — "내가 마지막으로 본 이후 서버가 안 바뀐 경우에만" 강제한다. 남의 작업을 뭉갤 위험이 줄어든다.
+</Callout>
+
+## 냥사원이 새로 배운 함정
+
+- **함정 1: "fetch했는데 코드가 그대로예요"**
+  정상이다. fetch는 `origin/main`만 갱신한다. 내 작업 디렉토리에 반영하려면 `git merge origin/main` 또는 처음부터 `git pull`.
+
+- **함정 2: `git push` 했는데 "upstream이 없다"**
+  로컬 브랜치가 어느 리모트 브랜치를 따라갈지 안 정해진 것. `git push -u origin <브랜치>`로 한 번 연결하면 다음부턴 그냥 `git push`.
+
+- **함정 3: "origin은 진짜 main이다"라는 착각**
+  `origin/main`은 사본이라 항상 한 발 늦을 수 있다. 동료가 방금 올렸어도 내가 fetch 전이면 안 보인다. 협업 중엔 작업 전 `git fetch` 습관.
+
+- **팁: 거절당하면 당황 말고 pull**
+  `! [rejected]`는 사고가 아니라 사고 직전에 멈춰준 것이다. `git pull` → (충돌 나면 다음 챕터에서) → `git push`. 이 리듬이 협업의 기본 박자.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '<code>git fetch</code>가 하는 일은?',
+      choices: [
+        { id: 'a', text: '서버 변경을 가져와 내 작업 디렉토리에 바로 합친다' },
+        { id: 'b', text: '서버 상태를 가져와 origin/main(추적 브랜치)만 갱신하고, 내 main·작업물은 건드리지 않는다' },
+        { id: 'c', text: '내 커밋을 서버로 보낸다' },
+      ],
+      answer: 'b',
+      explain:
+        'fetch는 "정보만". 합치는 건 merge/pull의 몫. 그래서 fetch는 언제 해도 안전하다.',
+    },
+    {
+      id: 'q2',
+      prompt: '<code>git pull</code>을 두 명령으로 풀면?',
+      choices: [
+        { id: 'a', text: 'git add + git commit' },
+        { id: 'b', text: 'git fetch + git merge (또는 --rebase 시 git rebase)' },
+        { id: 'c', text: 'git push + git fetch' },
+      ],
+      answer: 'b',
+      explain:
+        'pull = 가져오기(fetch) + 합치기(merge/rebase). 그래서 pull 도중 conflict가 날 수 있다.',
+    },
+    {
+      id: 'q3',
+      prompt:
+        'push가 <code>! [rejected] (non-fast-forward)</code>로 거절됐다. 올바른 대응은?',
+      choices: [
+        { id: 'a', text: 'git push --force 로 밀어버린다' },
+        { id: 'b', text: 'git pull 로 서버 변경을 먼저 가져와 합친 뒤 다시 push' },
+        { id: 'c', text: '저장소를 다시 clone 한다' },
+      ],
+      answer: 'b',
+      explain:
+        '거절은 "서버에 너 없는 커밋이 있다"는 신호. force로 덮으면 그 커밋이 사라진다. pull로 합치는 게 정답.',
+    },
+    {
+      id: 'q4',
+      prompt: 'origin/main 은 무엇인가?',
+      choices: [
+        { id: 'a', text: '서버의 main 과 실시간으로 동기화되는 라이브 포인터' },
+        { id: 'b', text: '내가 마지막으로 fetch/pull 했을 때 본 서버 main 의 사본 (리모트 추적 브랜치)' },
+        { id: 'c', text: '내 로컬 main 의 다른 이름' },
+      ],
+      answer: 'b',
+      explain:
+        '사본이라 fetch 전까지는 한 발 늦는다. 이걸 알면 "분명 올렸는데 안 보여요"가 이해된다.',
+    },
+  ]}
+/>
+
+## 다음 챕터로
+
+`pull`이 서버 변경을 "합친다"고 했다. 그 **합치는 순간** 무슨 일이 벌어지는지 — merge와 rebase, 그리고 냥사원을 서비스 다운까지 몰고 간 그 빨간 마커 — 를 다음 챕터에서 정면으로 다룬다.
+
+> 냥사원: "그 합칠 때 또 빨간 거 떴던 거…"
+> 냥부장: "응. 이번엔 그거 제대로 풀자."
