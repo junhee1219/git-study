@@ -119,7 +119,7 @@ export const chapters: ChapterMeta[] = [
     seoDescription:
       'amend와 interactive rebase로 지저분한 커밋을 깔끔하게 squash·정리하는 법. 커밋 해시가 새로 바뀌는 원리와 "공유한 커밋은 다시 쓰지 않는다"는 황금률을 인터랙티브로.',
     estimatedMinutes: 12,
-    prerequisites: ['merge'],
+    prerequisites: ['undoing'],
     status: 'ready',
     Component: lazy(() => import('./content/08-rewriting.mdx')),
   },

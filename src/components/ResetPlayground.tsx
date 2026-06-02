@@ -80,9 +80,13 @@ export function ResetPlayground() {
     pushReflog(`reset --hard (reflog 복구): → ${commits[to].id}`, to)
   }
 
+  const stagedLabels = commits
+    .slice(head + 1, indexAt + 1)
+    .map((c) => `'${c.label}'`)
+    .join(', ')
   const treeStatus =
     indexAt > head && workingAt > head
-      ? { kind: 'staged', text: `'${commits[Math.max(indexAt, workingAt)].label}'의 변경이 staged 상태로 남아있음` }
+      ? { kind: 'staged', text: `${stagedLabels}의 변경이 staged 상태로 남아있음` }
       : indexAt === head && workingAt > head
         ? { kind: 'unstaged', text: `'${commits[workingAt].label}'의 변경이 작업 디렉토리(unstaged)에 남아있음` }
         : indexAt === head && workingAt === head
@@ -119,14 +123,15 @@ export function ResetPlayground() {
           <ol className={styles.commits}>
             {commits.map((_, i) => i).reverse().map((i) => {
               const c = commits[i]
-              const orphaned = i > head
+              const detached = i > head // 브랜치 끝(head)보다 뒤 = 현재 브랜치 밖
+              const stillInTree = i <= Math.max(indexAt, workingAt) // index/working 에 내용 보존
               const isHead = i === head
               const isTarget = i === target
               return (
                 <li
                   key={c.id}
                   className={styles.commit}
-                  data-orphaned={orphaned}
+                  data-orphaned={detached}
                   data-head={isHead}
                   data-target={isTarget}
                   onClick={() => setTarget(i === head ? null : i)}
@@ -136,7 +141,11 @@ export function ResetPlayground() {
                   <span className={styles.clabel}>{c.label}</span>
                   <span className={styles.crefs}>
                     {isHead && <span className={styles.refHead}>HEAD → main</span>}
-                    {orphaned && <span className={styles.refOrphan}>reflog로 복구 가능</span>}
+                    {detached && (
+                      <span className={styles.refOrphan} data-kept={stillInTree}>
+                        {stillInTree ? '변경 보존됨' : 'reflog로 복구 가능'}
+                      </span>
+                    )}
                     {isTarget && <span className={styles.refTarget}>target</span>}
                   </span>
                 </li>

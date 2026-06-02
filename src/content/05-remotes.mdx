@@ -98,6 +98,28 @@ import { DialogueScene, Line } from '../components/DialogueScene'
 - **팁: 거절당하면 당황 말고 pull**
   `! [rejected]`는 사고가 아니라 사고 직전에 멈춰준 것이다. `git pull` → (충돌 나면 다음 챕터에서) → `git push`. 이 리듬이 협업의 기본 박자.
 
+## 보너스 — 태그로 릴리스에 이름표 붙이기
+
+4챕터에서 브랜치가 "commit을 가리키는 ref(작은 파일)"라고 했다. **태그(tag)도 똑같은 ref**다. 단, 브랜치는 커밋할 때마다 따라 움직이지만 태그는 **한 커밋에 고정**된다 — 그래서 `v1.0.0` 같은 릴리스 표시에 쓴다.
+
+<Terminal
+  title="bash"
+  lines={[
+    { type: 'comment', text: '현재 커밋에 버전 태그 붙이기 (annotated)' },
+    { type: 'prompt', text: 'git tag -a v1.0.0 -m "첫 정식 릴리스"' },
+    { type: 'comment', text: '태그는 push에 기본 포함 안 됨 — 따로 올려야 한다' },
+    { type: 'prompt', text: 'git push origin v1.0.0' },
+    { type: 'comment', text: '여러 태그 한 번에' },
+    { type: 'prompt', text: 'git push --tags' },
+    { type: 'comment', text: '원격 브랜치 삭제도 push 로 (콜론/--delete)' },
+    { type: 'prompt', text: 'git push origin --delete old-feature' },
+  ]}
+/>
+
+<Callout tone="info" title="태그도 push를 따로 해야 한다">
+  신입이 자주 빠지는 함정: 로컬에서 <code>git tag</code>만 찍고 <code>git push</code>를 해도 태그는 안 올라간다. 태그는 <code>git push origin &lt;태그&gt;</code> 또는 <code>--tags</code>로 명시적으로 올려야 GitHub 릴리스에 잡힌다.
+</Callout>
+
 ## 이해도 확인
 
 <Quiz

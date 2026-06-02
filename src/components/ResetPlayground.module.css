@@ -171,6 +171,10 @@
   color: var(--muted);
   border: 1px solid var(--border-strong);
 }
+.refOrphan[data-kept='true'] {
+  color: var(--accent-2);
+  border-color: var(--accent-2);
+}
 .refTarget {
   color: var(--accent);
   background: var(--accent-soft);

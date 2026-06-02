@@ -30,7 +30,7 @@ import { DialogueScene, Line } from '../components/DialogueScene'
 
 | 되돌리고 싶은 것 | 명령 | 한 일 |
 |---|---|---|
-| 작업 디렉토리의 수정 | `git restore <file>` | 마지막 커밋 내용으로 파일 복원 |
+| 작업 디렉토리의 수정 | `git restore <file>` | 스테이징(index)에 있는 버전으로 복원 — add한 적 없으면 결국 마지막 커밋 내용 |
 | 잘못 add한 것 | `git restore --staged <file>` | 스테이징만 취소(작업물은 유지) |
 | 이미 한 커밋 (히스토리 보존) | `git revert <commit>` | 그 커밋을 무효화하는 **새 커밋** 추가 |
 | 커밋 자체를 무르기 | `git reset <commit>` | 브랜치를 과거로 이동 (`--soft/--mixed/--hard`) |
@@ -44,6 +44,10 @@ import { DialogueScene, Line } from '../components/DialogueScene'
 ## reset 3형제 — 어느 칸까지 따라가나
 
 3챕터의 세 칸(작업 디렉토리 / 스테이징 / HEAD)을 떠올리자. reset은 HEAD를 옮기는데, **나머지 두 칸을 같이 끌고 갈지**가 옵션이다.
+
+## 냥사원, 직접 만져보다
+
+과거 커밋 하나를 골라 target으로 잡고 <code>--soft / --mixed / --hard</code>를 번갈아 눌러보자. 같은 reset인데 어느 칸까지 끌려오는지가 눈에 보인다. soft·mixed는 변경을 보존하고, hard만 작업을 떼어낸다.
 
 <ResetPlayground />
 
@@ -93,7 +97,7 @@ import { DialogueScene, Line } from '../components/DialogueScene'
   ]}
 />
 
-<Callout tone="info" title="stash 보다 나은 선택지도 있다">
+<Callout tone="info" title="stash보다 나은 선택지도 있다">
   핫픽스 때문에 작업을 치워야 한다면 stash 대신 <strong>worktree</strong>(마지막 챕터)가 더 편할 때가 많다. stash는 컨텍스트를 멈춰야 하지만, worktree는 작업을 그대로 둔 채 옆에 새 작업공간을 연다.
 </Callout>
 
@@ -103,10 +107,10 @@ import { DialogueScene, Line } from '../components/DialogueScene'
   커밋 안 한 변경은 reflog에도 안 남는다 (reflog는 커밋된 것만 추적). `--hard` 전엔 정말 버려도 되는지 두 번 확인.
 
 - **함정 2: 공유된 커밋을 reset하면 안 된다**
-  이미 push해서 남들이 가진 커밋을 reset으로 무르면, 5챕터의 "갈라짐 + 거절" 사고가 난다. 공유된 건 **revert**(새 커밋으로 무효화)로.
+  이미 push해서 남들이 가진 커밋을 reset으로 무르면, push가 거절되고 히스토리가 갈라지는 사고가 난다(5챕터의 그 빨간 글씨). 공유된 건 **revert**(새 커밋으로 무효화)로.
 
 - **함정 3: reflog는 영원하지 않다**
-  기본 90일 후 정리(gc)된다. 또 reflog는 **로컬 전용** — clone한 새 저장소엔 없다. 그래도 "방금 날린 것"엔 거의 항상 통한다.
+  도달 가능한 항목은 기본 90일, reset --hard 등으로 **도달 불가능해진 커밋은 기본 30일** 후 정리(gc)된다. 또 reflog는 **로컬 전용** — clone한 새 저장소엔 없다. 그래도 "방금 날린 것"엔 거의 항상 통한다.
 
 - **팁: 헷갈리면 revert가 가장 안전**
   revert는 아무것도 안 지운다. 과거 위에 "취소 커밋"을 쌓을 뿐. 운영에 잘못 나간 커밋을 되돌릴 때 표준이다.
@@ -169,7 +173,7 @@ import { DialogueScene, Line } from '../components/DialogueScene'
 
 ## 다음 챕터로
 
-reset `--soft`가 "되돌린 변경을 staged로 남긴다"고 했다. 이걸 응용하면 지저분한 커밋 여러 개를 깔끔한 하나로 합칠 수 있다. 다음 챕터에서 냥사원의 'wip', 'asdf' 커밋 30개를 정리한다 — 그리고 그러다 또 사고를 친다.
+reset `--soft`가 "되돌린 변경을 staged로 남긴다"고 했다. 이걸 응용하면 지저분한 커밋 여러 개를 깔끔한 하나로 합칠 수 있다. 다음 챕터에서 냥사원의 'wip', 'asdf' 커밋 31개를 정리한다 — 그리고 그러다 또 사고를 친다.
 
 > 냥부장: "커밋 메시지가 왜 전부 'ㅁㄴㅇㄹ'야?"
 > 냥사원: "…정리할게요."

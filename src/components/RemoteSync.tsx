@@ -24,17 +24,12 @@ type State = {
   tracking: C[] // 내가 아는 origin/main (remote-tracking, fetch 시 갱신)
 }
 
-function commonPrefix(a: C[], b: C[]): number {
-  let i = 0
-  while (i < a.length && i < b.length && a[i].id === b[i].id) i += 1
-  return i
-}
-
-// b 가 a 의 prefix(조상)인가 → push fast-forward 가능 여부
-function isPrefix(prefix: C[], full: C[]): boolean {
-  if (prefix.length > full.length) return false
-  return commonPrefix(prefix, full) === prefix.length
-}
+// chain 에 특정 커밋 id 가 들어있는가
+const has = (chain: C[], id: string) => chain.some((c) => c.id === id)
+// other 의 모든 커밋이 chain 에 포함되는가 (= other 가 chain 의 조상)
+const contains = (chain: C[], other: C[]) => other.every((c) => has(chain, c.id))
+// other 에 있는데 chain 엔 없는 커밋들
+const missingFrom = (chain: C[], other: C[]) => other.filter((c) => !has(chain, c.id))
 
 export function RemoteSync() {
   const [state, setState] = useState<State>(() => {
@@ -53,11 +48,14 @@ export function RemoteSync() {
 
   const say = (kind: 'ok' | 'err' | 'warn', text: string) => setFlash({ kind, text })
 
-  // origin/main(tracking) 기준 ahead / behind
-  const { ahead, behind } = useMemo(() => {
-    const cp = commonPrefix(state.local, state.tracking)
-    return { ahead: state.local.length - cp, behind: state.tracking.length - cp }
-  }, [state])
+  // origin/main(tracking) 기준 ahead / behind — id 포함관계로 계산
+  const { ahead, behind } = useMemo(
+    () => ({
+      ahead: missingFrom(state.tracking, state.local).length,
+      behind: missingFrom(state.local, state.tracking).length,
+    }),
+    [state],
+  )
 
   const localCommit = () => {
     setState((s) => ({
@@ -81,7 +79,8 @@ export function RemoteSync() {
   }
 
   const push = () => {
-    if (isPrefix(state.remote, state.local)) {
+    // 리모트의 모든 커밋이 로컬에 포함돼야(= 로컬이 리모트의 자손) fast-forward push 가능
+    if (contains(state.local, state.remote)) {
       setState((s) => ({ ...s, remote: [...s.local], tracking: [...s.local] }))
       say('ok', 'push 성공: origin/main 이 로컬 main 까지 전진.')
     } else {
@@ -93,25 +92,25 @@ export function RemoteSync() {
   }
 
   const pull = () => {
-    setState((s) => {
-      const tracking = [...s.remote] // fetch
-      const cp = commonPrefix(s.local, tracking)
-      const localAhead = s.local.length - cp
-      const remoteAhead = tracking.length - cp
-      if (remoteAhead === 0) {
-        // 로컬이 같거나 앞섬 → 통합할 것 없음
-        return { ...s, tracking }
-      }
-      if (localAhead === 0) {
-        // fast-forward: 로컬을 remote 로 전진
-        return { ...s, tracking, local: [...tracking] }
-      }
-      // 갈라짐 → merge commit
-      const theirs = tracking.slice(cp)
-      const merge: C = { id: nextId(), by: 'merge', label: 'Merge origin/main' }
-      return { ...s, tracking, local: [...s.local, ...theirs, merge] }
-    })
-    say('ok', 'pull = fetch + 통합. 리모트 변경을 로컬 main 으로 가져옴.')
+    const tracking = [...state.remote] // fetch
+    const remoteNew = missingFrom(state.local, tracking) // 가져올 리모트 커밋
+    const localNew = missingFrom(tracking, state.local) // 내 로컬 전용 커밋
+    if (remoteNew.length === 0) {
+      // 이미 최신 (로컬이 같거나 앞섬) → tracking 만 갱신
+      setState((s) => ({ ...s, tracking }))
+      say('ok', 'pull: 가져올 새 커밋 없음. origin/main 만 갱신.')
+      return
+    }
+    if (localNew.length === 0) {
+      // fast-forward: 로컬을 origin 까지 전진
+      setState((s) => ({ ...s, tracking, local: [...tracking] }))
+      say('ok', 'pull (fast-forward): 로컬 main 을 origin 까지 전진.')
+      return
+    }
+    // 갈라짐 → merge commit (가져올 커밋 + 머지)
+    const merge: C = { id: nextId(), by: 'merge', label: 'Merge origin/main' }
+    setState((s) => ({ ...s, tracking, local: [...s.local, ...remoteNew, merge] }))
+    say('ok', 'pull = fetch + 통합. 갈래를 merge 커밋으로 합침.')
   }
 
   const forcePush = () => {

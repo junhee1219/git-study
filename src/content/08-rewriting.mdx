@@ -4,7 +4,7 @@ import { Callout } from '../components/Callout'
 import { Quiz } from '../components/Quiz'
 import { DialogueScene, Line } from '../components/DialogueScene'
 
-## 냥사원의 'asdf' 커밋 30개
+## 냥사원의 'asdf' 커밋 31개
 
 금요일 오전. 냥사원이 일주일치 작업으로 PR을 올렸다. 리뷰어 냥대리가 PR을 연다.
 
@@ -43,7 +43,11 @@ import { DialogueScene, Line } from '../components/DialogueScene'
 
 ## 여러 커밋을 다듬기 — interactive rebase
 
-`git rebase -i HEAD~N`은 최근 N개 커밋의 "할 일 목록"을 띄운다. 각 줄에 동작을 지정한다.
+`git rebase -i HEAD~N`은 최근 N개 커밋의 "할 일 목록"을 띄운다. 각 줄에 pick/reword/squash/fixup/drop 중 하나를 지정한다.
+
+## 냥사원, 직접 만져보다
+
+냥사원의 31개짜리 'asdf' 더미를 직접 정리해보자. 각 줄에 <code>pick / fixup / squash / drop</code>을 지정하면 오른쪽 결과 히스토리가 실시간으로 줄어든다. 순서도 바꿔보자.
 
 <RebaseTodo />
 
@@ -94,8 +98,8 @@ import { DialogueScene, Line } from '../components/DialogueScene'
 - **함정 1: amend는 공유 후엔 금지**
   로컬에서 방금 한 커밋엔 자유롭게. push한 뒤엔 새 커밋(또는 새 amend)이 거절을 부른다.
 
-- **함정 2: rebase는 모든 해시를 바꾼다**
-  부모가 바뀌면 자식 커밋의 해시도 줄줄이 바뀐다(2챕터). 그래서 공유 브랜치 rebase가 위험한 것.
+- **함정 2: rebase는 다시 쓰는 범위의 해시를 전부 바꾼다**
+  부모가 바뀌면 자식 커밋의 해시도 줄줄이 바뀐다(2챕터). 베이스 이후의 커밋이 통째로 새 객체가 되는 것 — 그래서 공유 브랜치 rebase가 위험하다.
 
 - **함정 3: squash로 너무 많이 뭉치면 이력이 사라진다**
   "왜 이렇게 고쳤지?"를 추적할 단위가 너무 커진다. 의미 단위(기능 하나 = 커밋 하나)가 적당하다.
